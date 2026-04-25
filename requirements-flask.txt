@@ -1,0 +1,3 @@
+# Additional dependency required ONLY for the Flask UI (app_flask.py).
+# The default Gradio UI (app.py) does not need this.
+flask>=3.0

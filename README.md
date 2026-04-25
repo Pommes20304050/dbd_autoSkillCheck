@@ -81,6 +81,22 @@ Use this method if you have some experience with Python and if you want to custo
 4) Run `python app.py` to start the AI model web UI
 5) Follow the [next instructions](#auto-skill-check-web-ui)
 
+#### Optional: alternative Flask UI
+
+A custom Flask-based dashboard is available as a drop-in alternative to the Gradio UI. It adds:
+
+- Adaptive CPU/GPU detection (real core count, real GPU name, available providers)
+- A live FPS advisor that reads the in-game `FrameRateLimit` from `GameUserSettings.ini` and warns when the tool's rolling-average FPS lags the game cap (the README requires both ≥ 60 fps for reliable great-hits)
+- Toast notifications for status, errors, and FPS warnings
+- Clearer error messages with explanations of *why* something failed
+
+To use it:
+
+1) `pip install -r requirements-flask.txt` (just adds `flask`)
+2) `python app_flask.py` → open http://127.0.0.1:7860
+
+The default `app.py` (Gradio) is unchanged.
+
 
 ## Auto skill-check Web UI
 

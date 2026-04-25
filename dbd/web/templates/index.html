@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DBD Auto Skill Check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <!-- ══ TOASTS ═════════════════════════════════════════════════ -->
+  <div class="toast-container" id="toasts"></div>
+
+  <div class="app">
+
+    <!-- ══ SIDEBAR ════════════════════════════════════════════════ -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">⚡</div>
+        <div class="brand-text">
+          <div class="brand-name">DBD ASC</div>
+          <div class="brand-ver">FLASK UI</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">System</div>
+        <div class="sidebar-stat">
+          <span class="sidebar-stat-label">Status</span>
+          <span class="sidebar-stat-value orange" id="sb-status">idle</span>
+        </div>
+        <div class="sidebar-stat">
+          <span class="sidebar-stat-label">Provider</span>
+          <span class="sidebar-stat-value" id="sb-provider">—</span>
+        </div>
+        <div class="sidebar-stat">
+          <span class="sidebar-stat-label">Tool FPS</span>
+          <span class="sidebar-stat-value orange" id="sb-fps">0.0</span>
+        </div>
+        <div class="sidebar-stat">
+          <span class="sidebar-stat-label">Hits</span>
+          <span class="sidebar-stat-value" id="sb-hits">0</span>
+        </div>
+        <div class="sidebar-stat">
+          <span class="sidebar-stat-label">Hits / min</span>
+          <span class="sidebar-stat-value" id="sb-hpm">0</span>
+        </div>
+
+        <div class="sidebar-actions">
+          <button class="sidebar-btn sidebar-btn-primary" id="btn-run">▶ RUN</button>
+          <button class="sidebar-btn sidebar-btn-stop" id="btn-stop" disabled>■ STOP</button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-copy">
+          MANUTEAA / DBD_ASC<br />
+          FLASK UI · v1
+        </div>
+      </div>
+    </aside>
+
+    <!-- ══ MAIN ═══════════════════════════════════════════════════ -->
+    <main class="main">
+      <div class="topbar">
+        <div class="page-title">
+          <h1>Auto Skill Check</h1>
+          <p>AI-powered great-skill-check detection &amp; auto-press</p>
+        </div>
+        <div class="topbar-right">
+          <div class="gpu-chip">
+            <span class="gpu-dot" id="status-dot"></span>
+            <span id="status-pill">IDLE</span>
+            <span class="chip-pct" id="status-fps">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FPS ADVISOR BANNER -->
+      <div class="advisor-banner advisor-hidden" id="advisor">
+        <div class="advisor-icon" id="advisor-icon">⚠</div>
+        <div class="advisor-body">
+          <div class="advisor-msg" id="advisor-msg"></div>
+          <div class="advisor-rec" id="advisor-rec"></div>
+        </div>
+        <button class="advisor-close" id="advisor-close" title="Dismiss">✕</button>
+      </div>
+
+      <!-- SETTINGS CARD -->
+      <div class="card card-settings">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Inference Settings</div>
+            <div class="card-sub">Configure once, then RUN. Changes apply on next start.</div>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <div class="setting-block">
+            <label class="setting-label">AI Model</label>
+            <select class="ctrl-select" id="cfg-model"></select>
+            <div class="setting-hint" id="cfg-model-hint">Drop ONNX or TensorRT files into <code>models/</code>.</div>
+          </div>
+
+          <div class="setting-block">
+            <label class="setting-label">
+              Device
+              <span class="setting-value" id="cfg-device-summary">—</span>
+            </label>
+            <div class="seg-control" id="cfg-device"></div>
+            <div class="setting-hint" id="cfg-device-hint">GPU requires PyTorch + CUDA / DirectML / TensorRT.</div>
+          </div>
+
+          <div class="setting-block">
+            <label class="setting-label">Screen Lib</label>
+            <div class="seg-control" id="cfg-monlib"></div>
+            <div class="setting-hint">bettercam is faster but Windows-only and optional.</div>
+          </div>
+
+          <div class="setting-block">
+            <label class="setting-label">Monitor</label>
+            <select class="ctrl-select" id="cfg-monitor"></select>
+            <div class="setting-hint">Center 224×224 of the chosen monitor is sampled.</div>
+          </div>
+
+          <div class="setting-block">
+            <label class="setting-label">
+              Ante-frontier hit delay
+              <span class="setting-value" id="cfg-ante-val">20 ms</span>
+            </label>
+            <input type="range" min="0" max="50" step="5" value="20" id="cfg-ante" />
+            <div class="setting-hint">Tiny pre-press delay for ante-frontier hits.</div>
+          </div>
+
+          <div class="setting-block">
+            <label class="setting-label">
+              CPU workload
+              <span class="setting-value" id="cfg-cpu-summary">—</span>
+            </label>
+            <div class="seg-control" id="cfg-cpu"></div>
+            <div class="setting-hint" id="cfg-cpu-hint">Adapts to your CPU. Higher = more throughput, more load.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MINI STATS -->
+      <div class="stats-row">
+        <div class="mini-stat">
+          <div class="mini-label">Tool FPS</div>
+          <div class="mini-value orange" id="ms-fps">0.0</div>
+          <div class="mini-bar"><div class="mini-bar-fill orange" id="ms-fps-bar"></div></div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-label">Hits Total</div>
+          <div class="mini-value" id="ms-hits">0</div>
+          <div class="mini-bar"><div class="mini-bar-fill amber" id="ms-hits-bar"></div></div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-label">Hits / min</div>
+          <div class="mini-value" id="ms-hpm">0</div>
+          <div class="mini-bar"><div class="mini-bar-fill orange" id="ms-hpm-bar"></div></div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-label">Game FPS Cap</div>
+          <div class="mini-value" id="ms-gamefps">—</div>
+          <div class="mini-bar"><div class="mini-bar-fill amber" id="ms-gamefps-bar"></div></div>
+        </div>
+      </div>
+
+      <!-- LIVE FEED + DONUT -->
+      <div class="content-grid">
+        <div class="card card-feed">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Live Monitor Feed</div>
+              <div class="card-sub">Center 224×224 the model sees</div>
+            </div>
+            <div class="feed-fps" id="feed-fps-chip">— FPS</div>
+          </div>
+          <div class="feed-wrap">
+            <img id="live-feed" alt="live feed (start the tool to populate)" />
+            <div class="feed-empty" id="feed-empty">Press RUN or pick a monitor to preview</div>
+          </div>
+        </div>
+
+        <div class="card card-donut">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Last Skill Check</div>
+              <div class="card-sub" id="donut-sub">No hit yet</div>
+            </div>
+          </div>
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 120 120">
+              <circle class="donut-bg" cx="60" cy="60" r="50"></circle>
+              <circle class="donut-seg seg-high" cx="60" cy="60" r="50" id="donut-seg"></circle>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-val" id="donut-val">—</div>
+              <div class="donut-lbl">CONFIDENCE</div>
+            </div>
+          </div>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+
+        <div class="card card-lasthit">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Last Hit Frame</div>
+              <div class="card-sub" id="lasthit-sub">Captured frame the model fired SPACE on</div>
+            </div>
+          </div>
+          <div class="lasthit-wrap">
+            <img id="lasthit-img" alt="last hit frame (none yet)" />
+            <div class="feed-empty" id="lasthit-empty">No hit yet</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        Open-source · drop-in alternative to <code>app.py</code> (Gradio). Source:
+        <a href="https://github.com/Manuteaa/dbd_autoSkillCheck" target="_blank" rel="noopener">github.com/Manuteaa/dbd_autoSkillCheck</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
