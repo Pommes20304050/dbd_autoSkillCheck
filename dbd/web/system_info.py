@@ -22,6 +22,9 @@ def adaptive_cpu_presets(cores):
         return [("Single", 1), ("All", cores)]
     if cores <= 4:
         return [("Low", 1), ("Normal", 2), ("High", cores - 1), ("Max", cores)]
+    if cores <= 6:
+        # Tighter spacing on 5-6 core CPUs so High != Max
+        return [("Low", 2), ("Normal", 3), ("High", cores - 1), ("Max", cores)]
     if cores <= 8:
         return [("Low", 2), ("Normal", 4), ("High", 6), ("Max", cores)]
     # 9+ cores: leave 2 for OS at Max
