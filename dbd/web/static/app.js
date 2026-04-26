@@ -17,6 +17,13 @@
       "sidebar.hits": "Hits",
       "sidebar.run": "▶ RUN",
       "sidebar.stop": "■ STOP",
+      "sidebar.quit": "⏻ QUIT",
+      "modal.quitTitle": "Quit application?",
+      "modal.quitBody": "This will stop the worker and shut down the Python server. You can close the browser tab afterwards.",
+      "modal.quitConfirm": "Quit",
+      "modal.quitCancel": "Cancel",
+      "toast.quitTitle": "Server stopped",
+      "toast.quitBody": "All Python processes have been terminated. You can close this tab.",
       "sidebar.copy": "MANUTEAA / DBD_ASC<br />FLASK UI · v1",
       "nav.open": "Open",
       "nav.perf": "Performance Monitor",
@@ -43,8 +50,6 @@
       "settings.deviceHintGpuMissing": "GPU runtime missing.",
       "settings.deviceHintGpuOk": "Will run inference on your GPU.",
       "settings.deviceHintGpuRequires": "GPU requires PyTorch + CUDA / DirectML / TensorRT.",
-      "settings.screenLib": "Screen Lib",
-      "settings.screenLibHint": "bettercam is faster but Windows-only and optional.",
       "settings.monitor": "Monitor",
       "settings.monitorHint": "Center 224×224 of the chosen monitor is sampled.",
       "settings.ante": "Ante-frontier hit delay",
@@ -167,6 +172,52 @@
       "about.p2": "Hardware-adaptive CPU presets, hybrid-CPU P-Cores pinning, GPU performance monitor (NVIDIA only via <code>nvidia-smi</code>), and a live FPS advisor that compares the rolling tool FPS to the game's <code>FrameRateLimit</code>.",
       "about.p3": 'CPU temperature / power readings require <a href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor" target="_blank" rel="noopener">LibreHardwareMonitor</a> to be installed and running (its WMI namespace is queried).',
       "footer.note": 'Open-source · drop-in alternative to <code>app.py</code> (Gradio). Source: <a href="https://github.com/Manuteaa/dbd_autoSkillCheck" target="_blank" rel="noopener">github.com/Manuteaa/dbd_autoSkillCheck</a>',
+
+      // ── Preflight advisor ──
+      "preflight.summary.danger": "Preflight: {n} blocking issue(s) — the tool will not start until you fix these.",
+      "preflight.summary.warn":   "Preflight: {n} warning(s) — the tool will run but with reduced functionality.",
+      "preflight.summary.info":   "Preflight: {n} note(s) — informational, no action required to run.",
+      "preflight.recommend.danger": "Open Details and run the suggested commands.",
+      "preflight.recommend.warn":   "Open Details to see what's degraded and how to enable it.",
+      "preflight.recommend.info":   "Open Details for more.",
+      "preflight.missing.flask.text":   "Required package missing: {pkg} (web server).",
+      "preflight.missing.flask.fix":    "pip install {pkg}",
+      "preflight.missing.numpy.text":   "Required package missing: {pkg} (tensors / arrays).",
+      "preflight.missing.numpy.fix":    "pip install {pkg}",
+      "preflight.missing.opencv.text":  "Required package missing: {pkg} (image preprocessing).",
+      "preflight.missing.opencv.fix":   "pip install {pkg}",
+      "preflight.missing.mss.text":     "Required package missing: {pkg} (screen capture).",
+      "preflight.missing.mss.fix":      "pip install {pkg}",
+      "preflight.missing.pillow.text":  "Required package missing: {pkg} (image encoding).",
+      "preflight.missing.pillow.fix":   "pip install {pkg}",
+      "preflight.missing.psutil.text":  "Required package missing: {pkg} (CPU monitor).",
+      "preflight.missing.psutil.fix":   "pip install {pkg}",
+      "preflight.missing.onnxruntime.text": "ONNX Runtime is not installed — AI inference cannot run.",
+      "preflight.missing.onnxruntime.fix":  "pip install onnxruntime  (CPU)  OR  pip install onnxruntime-gpu  (NVIDIA)",
+      "preflight.models.folderMissing.text": "Models folder ./models does not exist.",
+      "preflight.models.folderMissing.fix":  "mkdir models  and drop a .onnx (or .trt) model into it.",
+      "preflight.models.empty.text": "Models folder is empty — no .onnx or .trt files found.",
+      "preflight.models.empty.fix":  "Drop a .onnx (or .trt) model into ./models.",
+      "preflight.models.notFound.text": "Selected model \"{model}\" is no longer in the models folder.",
+      "preflight.models.notFound.fix":  "Pick a different model from the dropdown, or restore the file.",
+      "preflight.trt.needsTorch.text":     "TensorRT model selected, but PyTorch is not installed.",
+      "preflight.trt.needsTorch.fix":      "Install PyTorch with CUDA from https://pytorch.org/get-started/locally/",
+      "preflight.trt.needsTensorrt.text":  "TensorRT model selected, but the tensorrt package is not installed.",
+      "preflight.trt.needsTensorrt.fix":   "pip install tensorrt  (must match your CUDA toolkit version)",
+      "preflight.trt.needsPycuda.text":    "TensorRT model selected, but pycuda is not installed.",
+      "preflight.trt.needsPycuda.fix":     "pip install pycuda",
+      "preflight.gpu.needsTorch.text":   "GPU device selected, but PyTorch is not installed (recommended for GPU).",
+      "preflight.gpu.needsTorch.fix":    "Install PyTorch with CUDA from https://pytorch.org/get-started/locally/",
+      "preflight.gpu.torchNoCuda.text":  "PyTorch is the CPU-only build — torch.cuda.is_available() is False.",
+      "preflight.gpu.torchNoCuda.fix":   "Reinstall the CUDA build: pip uninstall torch && install from https://pytorch.org",
+      "preflight.gpu.needsOrtGpu.text":  "Only the CPU ONNX Runtime is installed — GPU mode will fall back to CPU.",
+      "preflight.gpu.needsOrtGpu.fix":   "pip uninstall onnxruntime && pip install onnxruntime-gpu",
+      "preflight.gpu.noProvider.text":   "No GPU execution provider available (CUDA / DML / TensorRT not registered).",
+      "preflight.gpu.noProvider.fix":    "Install onnxruntime-gpu and verify your GPU driver / CUDA toolkit.",
+      "preflight.nvidiaSmi.missing.text": "NVIDIA GPU is in use but nvidia-smi was not found on PATH.",
+      "preflight.nvidiaSmi.missing.fix":  "Install/repair the NVIDIA driver — without nvidia-smi the Performance Monitor stays blank.",
+      "preflight.python.versionUntested.text": "Python {version} is outside the tested range (3.10–3.12).",
+      "preflight.python.versionUntested.fix":  "It may still work; use 3.10–3.12 if you hit weird errors.",
     },
 
     de: {
@@ -181,6 +232,13 @@
       "sidebar.hits": "Treffer",
       "sidebar.run": "▶ START",
       "sidebar.stop": "■ STOP",
+      "sidebar.quit": "⏻ BEENDEN",
+      "modal.quitTitle": "Anwendung beenden?",
+      "modal.quitBody": "Damit wird der Worker gestoppt und der Python-Server heruntergefahren. Den Browser-Tab kannst du danach schließen.",
+      "modal.quitConfirm": "Beenden",
+      "modal.quitCancel": "Abbrechen",
+      "toast.quitTitle": "Server beendet",
+      "toast.quitBody": "Alle Python-Prozesse wurden beendet. Du kannst diesen Tab schließen.",
       "sidebar.copy": "MANUTEAA / DBD_ASC<br />FLASK UI · v1",
       "nav.open": "Hauptseite",
       "nav.perf": "Performance-Monitor",
@@ -207,8 +265,6 @@
       "settings.deviceHintGpuMissing": "GPU-Runtime fehlt.",
       "settings.deviceHintGpuOk": "Inferenz läuft auf deiner GPU.",
       "settings.deviceHintGpuRequires": "GPU benötigt PyTorch + CUDA / DirectML / TensorRT.",
-      "settings.screenLib": "Bildschirm-Lib",
-      "settings.screenLibHint": "bettercam ist schneller, aber nur unter Windows verfügbar (optional).",
       "settings.monitor": "Monitor",
       "settings.monitorHint": "Es wird das mittige 224×224-Feld des gewählten Monitors abgegriffen.",
       "settings.ante": "Ante-frontier-Verzögerung",
@@ -331,6 +387,52 @@
       "about.p2": "Hardware-adaptive CPU-Presets, P-Cores-Pinning für hybride CPUs, GPU-Performance-Monitor (nur NVIDIA via <code>nvidia-smi</code>) und ein Live-FPS-Advisor, der die mittlere Tool-FPS mit dem <code>FrameRateLimit</code> des Spiels vergleicht.",
       "about.p3": 'CPU-Temperatur/-Leistung benötigt <a href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor" target="_blank" rel="noopener">LibreHardwareMonitor</a>, installiert und gestartet (der WMI-Namespace wird abgefragt).',
       "footer.note": 'Open Source · Drop-in-Alternative zu <code>app.py</code> (Gradio). Quellcode: <a href="https://github.com/Manuteaa/dbd_autoSkillCheck" target="_blank" rel="noopener">github.com/Manuteaa/dbd_autoSkillCheck</a>',
+
+      // ── Preflight Advisor ──
+      "preflight.summary.danger": "Preflight: {n} kritische(s) Problem(e) — das Tool startet nicht, bis Sie das beheben.",
+      "preflight.summary.warn":   "Preflight: {n} Warnung(en) — das Tool läuft, aber mit eingeschränkter Funktionalität.",
+      "preflight.summary.info":   "Preflight: {n} Hinweis(e) — informativ, keine Aktion zum Starten nötig.",
+      "preflight.recommend.danger": "Details öffnen und die vorgeschlagenen Befehle ausführen.",
+      "preflight.recommend.warn":   "Details öffnen, um zu sehen, was eingeschränkt ist.",
+      "preflight.recommend.info":   "Details öffnen für mehr Informationen.",
+      "preflight.missing.flask.text":   "Erforderliches Paket fehlt: {pkg} (Web-Server).",
+      "preflight.missing.flask.fix":    "pip install {pkg}",
+      "preflight.missing.numpy.text":   "Erforderliches Paket fehlt: {pkg} (Tensoren / Arrays).",
+      "preflight.missing.numpy.fix":    "pip install {pkg}",
+      "preflight.missing.opencv.text":  "Erforderliches Paket fehlt: {pkg} (Bildvorverarbeitung).",
+      "preflight.missing.opencv.fix":   "pip install {pkg}",
+      "preflight.missing.mss.text":     "Erforderliches Paket fehlt: {pkg} (Bildschirmaufnahme).",
+      "preflight.missing.mss.fix":      "pip install {pkg}",
+      "preflight.missing.pillow.text":  "Erforderliches Paket fehlt: {pkg} (Bildkodierung).",
+      "preflight.missing.pillow.fix":   "pip install {pkg}",
+      "preflight.missing.psutil.text":  "Erforderliches Paket fehlt: {pkg} (CPU-Monitor).",
+      "preflight.missing.psutil.fix":   "pip install {pkg}",
+      "preflight.missing.onnxruntime.text": "ONNX Runtime ist nicht installiert — KI-Inferenz kann nicht laufen.",
+      "preflight.missing.onnxruntime.fix":  "pip install onnxruntime  (CPU)  ODER  pip install onnxruntime-gpu  (NVIDIA)",
+      "preflight.models.folderMissing.text": "Models-Ordner ./models existiert nicht.",
+      "preflight.models.folderMissing.fix":  "mkdir models  und ein .onnx (oder .trt) Modell hineinlegen.",
+      "preflight.models.empty.text": "Models-Ordner ist leer — keine .onnx oder .trt Dateien gefunden.",
+      "preflight.models.empty.fix":  "Ein .onnx (oder .trt) Modell in ./models ablegen.",
+      "preflight.models.notFound.text": "Ausgewähltes Modell \"{model}\" ist nicht mehr im Models-Ordner.",
+      "preflight.models.notFound.fix":  "Anderes Modell aus dem Dropdown wählen oder Datei wiederherstellen.",
+      "preflight.trt.needsTorch.text":     "TensorRT-Modell gewählt, aber PyTorch ist nicht installiert.",
+      "preflight.trt.needsTorch.fix":      "PyTorch mit CUDA installieren von https://pytorch.org/get-started/locally/",
+      "preflight.trt.needsTensorrt.text":  "TensorRT-Modell gewählt, aber das tensorrt-Paket ist nicht installiert.",
+      "preflight.trt.needsTensorrt.fix":   "pip install tensorrt  (muss zur CUDA-Toolkit-Version passen)",
+      "preflight.trt.needsPycuda.text":    "TensorRT-Modell gewählt, aber pycuda ist nicht installiert.",
+      "preflight.trt.needsPycuda.fix":     "pip install pycuda",
+      "preflight.gpu.needsTorch.text":   "GPU-Gerät gewählt, aber PyTorch ist nicht installiert (für GPU empfohlen).",
+      "preflight.gpu.needsTorch.fix":    "PyTorch mit CUDA installieren von https://pytorch.org/get-started/locally/",
+      "preflight.gpu.torchNoCuda.text":  "PyTorch ist die CPU-Variante — torch.cuda.is_available() ist False.",
+      "preflight.gpu.torchNoCuda.fix":   "CUDA-Variante neu installieren: pip uninstall torch und dann von https://pytorch.org",
+      "preflight.gpu.needsOrtGpu.text":  "Nur die CPU ONNX Runtime ist installiert — GPU fällt auf CPU zurück.",
+      "preflight.gpu.needsOrtGpu.fix":   "pip uninstall onnxruntime && pip install onnxruntime-gpu",
+      "preflight.gpu.noProvider.text":   "Kein GPU-Execution-Provider verfügbar (CUDA / DML / TensorRT nicht registriert).",
+      "preflight.gpu.noProvider.fix":    "onnxruntime-gpu installieren und GPU-Treiber / CUDA-Toolkit prüfen.",
+      "preflight.nvidiaSmi.missing.text": "NVIDIA-GPU wird verwendet, aber nvidia-smi ist nicht im PATH.",
+      "preflight.nvidiaSmi.missing.fix":  "NVIDIA-Treiber installieren/reparieren — ohne nvidia-smi bleibt der Performance Monitor leer.",
+      "preflight.python.versionUntested.text": "Python {version} liegt außerhalb des getesteten Bereichs (3.10–3.12).",
+      "preflight.python.versionUntested.fix":  "Funktioniert evtl. trotzdem; bei seltsamen Fehlern 3.10–3.12 verwenden.",
     },
 
     fr: {
@@ -345,6 +447,13 @@
       "sidebar.hits": "Hits",
       "sidebar.run": "▶ DÉMARRER",
       "sidebar.stop": "■ STOP",
+      "sidebar.quit": "⏻ QUITTER",
+      "modal.quitTitle": "Quitter l'application ?",
+      "modal.quitBody": "Cela arrête le worker et coupe le serveur Python. Vous pourrez ensuite fermer cet onglet.",
+      "modal.quitConfirm": "Quitter",
+      "modal.quitCancel": "Annuler",
+      "toast.quitTitle": "Serveur arrêté",
+      "toast.quitBody": "Tous les processus Python ont été terminés. Vous pouvez fermer cet onglet.",
       "sidebar.copy": "MANUTEAA / DBD_ASC<br />FLASK UI · v1",
       "nav.open": "Accueil",
       "nav.perf": "Moniteur de performance",
@@ -371,8 +480,6 @@
       "settings.deviceHintGpuMissing": "Runtime GPU manquant.",
       "settings.deviceHintGpuOk": "L'inférence tourne sur ton GPU.",
       "settings.deviceHintGpuRequires": "GPU requiert PyTorch + CUDA / DirectML / TensorRT.",
-      "settings.screenLib": "Lib. d'écran",
-      "settings.screenLibHint": "bettercam est plus rapide mais Windows seulement (optionnel).",
       "settings.monitor": "Moniteur",
       "settings.monitorHint": "Le centre 224×224 du moniteur choisi est échantillonné.",
       "settings.ante": "Délai ante-frontier",
@@ -495,6 +602,52 @@
       "about.p2": "Préréglages CPU adaptatifs, épinglage P-Cores pour CPU hybrides, moniteur GPU (NVIDIA via <code>nvidia-smi</code>), et conseiller FPS en direct comparant la moyenne mobile de l'outil au <code>FrameRateLimit</code> du jeu.",
       "about.p3": 'Lectures température/puissance CPU nécessitent <a href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor" target="_blank" rel="noopener">LibreHardwareMonitor</a> installé et lancé (son namespace WMI est requêté).',
       "footer.note": 'Open-source · alternative drop-in à <code>app.py</code> (Gradio). Source : <a href="https://github.com/Manuteaa/dbd_autoSkillCheck" target="_blank" rel="noopener">github.com/Manuteaa/dbd_autoSkillCheck</a>',
+
+      // ── Preflight Advisor ──
+      "preflight.summary.danger": "Preflight : {n} problème(s) bloquant(s) — l'outil ne démarrera pas tant que ce n'est pas corrigé.",
+      "preflight.summary.warn":   "Preflight : {n} avertissement(s) — l'outil fonctionnera avec des fonctionnalités réduites.",
+      "preflight.summary.info":   "Preflight : {n} note(s) — informatif, aucune action requise pour démarrer.",
+      "preflight.recommend.danger": "Ouvrez Détails et exécutez les commandes proposées.",
+      "preflight.recommend.warn":   "Ouvrez Détails pour voir ce qui est dégradé et comment l'activer.",
+      "preflight.recommend.info":   "Ouvrez Détails pour plus d'informations.",
+      "preflight.missing.flask.text":   "Paquet requis manquant : {pkg} (serveur web).",
+      "preflight.missing.flask.fix":    "pip install {pkg}",
+      "preflight.missing.numpy.text":   "Paquet requis manquant : {pkg} (tenseurs / tableaux).",
+      "preflight.missing.numpy.fix":    "pip install {pkg}",
+      "preflight.missing.opencv.text":  "Paquet requis manquant : {pkg} (prétraitement d'image).",
+      "preflight.missing.opencv.fix":   "pip install {pkg}",
+      "preflight.missing.mss.text":     "Paquet requis manquant : {pkg} (capture d'écran).",
+      "preflight.missing.mss.fix":      "pip install {pkg}",
+      "preflight.missing.pillow.text":  "Paquet requis manquant : {pkg} (encodage d'image).",
+      "preflight.missing.pillow.fix":   "pip install {pkg}",
+      "preflight.missing.psutil.text":  "Paquet requis manquant : {pkg} (moniteur CPU).",
+      "preflight.missing.psutil.fix":   "pip install {pkg}",
+      "preflight.missing.onnxruntime.text": "ONNX Runtime n'est pas installé — l'inférence IA ne peut pas s'exécuter.",
+      "preflight.missing.onnxruntime.fix":  "pip install onnxruntime  (CPU)  OU  pip install onnxruntime-gpu  (NVIDIA)",
+      "preflight.models.folderMissing.text": "Le dossier ./models n'existe pas.",
+      "preflight.models.folderMissing.fix":  "mkdir models  et placez-y un modèle .onnx (ou .trt).",
+      "preflight.models.empty.text": "Dossier models vide — aucun fichier .onnx ou .trt trouvé.",
+      "preflight.models.empty.fix":  "Placez un modèle .onnx (ou .trt) dans ./models.",
+      "preflight.models.notFound.text": "Le modèle sélectionné « {model} » n'est plus dans le dossier models.",
+      "preflight.models.notFound.fix":  "Choisissez un autre modèle dans la liste ou restaurez le fichier.",
+      "preflight.trt.needsTorch.text":     "Modèle TensorRT sélectionné, mais PyTorch n'est pas installé.",
+      "preflight.trt.needsTorch.fix":      "Installez PyTorch avec CUDA depuis https://pytorch.org/get-started/locally/",
+      "preflight.trt.needsTensorrt.text":  "Modèle TensorRT sélectionné, mais le paquet tensorrt n'est pas installé.",
+      "preflight.trt.needsTensorrt.fix":   "pip install tensorrt  (doit correspondre à votre CUDA toolkit)",
+      "preflight.trt.needsPycuda.text":    "Modèle TensorRT sélectionné, mais pycuda n'est pas installé.",
+      "preflight.trt.needsPycuda.fix":     "pip install pycuda",
+      "preflight.gpu.needsTorch.text":   "GPU sélectionné, mais PyTorch n'est pas installé (recommandé pour GPU).",
+      "preflight.gpu.needsTorch.fix":    "Installez PyTorch avec CUDA depuis https://pytorch.org/get-started/locally/",
+      "preflight.gpu.torchNoCuda.text":  "PyTorch est en build CPU — torch.cuda.is_available() est False.",
+      "preflight.gpu.torchNoCuda.fix":   "Réinstallez la build CUDA : pip uninstall torch puis depuis https://pytorch.org",
+      "preflight.gpu.needsOrtGpu.text":  "Seul ONNX Runtime CPU est installé — le GPU retombera sur CPU.",
+      "preflight.gpu.needsOrtGpu.fix":   "pip uninstall onnxruntime && pip install onnxruntime-gpu",
+      "preflight.gpu.noProvider.text":   "Aucun execution provider GPU disponible (CUDA / DML / TensorRT non enregistré).",
+      "preflight.gpu.noProvider.fix":    "Installez onnxruntime-gpu et vérifiez le pilote GPU / CUDA toolkit.",
+      "preflight.nvidiaSmi.missing.text": "GPU NVIDIA en usage mais nvidia-smi est introuvable dans PATH.",
+      "preflight.nvidiaSmi.missing.fix":  "Installez/réparez le pilote NVIDIA — sans nvidia-smi le Performance Monitor reste vide.",
+      "preflight.python.versionUntested.text": "Python {version} est hors de la plage testée (3.10–3.12).",
+      "preflight.python.versionUntested.fix":  "Peut fonctionner ; en cas d'erreurs étranges, utilisez 3.10–3.12.",
     },
 
     es: {
@@ -509,6 +662,13 @@
       "sidebar.hits": "Aciertos",
       "sidebar.run": "▶ INICIAR",
       "sidebar.stop": "■ DETENER",
+      "sidebar.quit": "⏻ SALIR",
+      "modal.quitTitle": "¿Salir de la aplicación?",
+      "modal.quitBody": "Esto detendrá el worker y cerrará el servidor Python. Después puedes cerrar la pestaña.",
+      "modal.quitConfirm": "Salir",
+      "modal.quitCancel": "Cancelar",
+      "toast.quitTitle": "Servidor detenido",
+      "toast.quitBody": "Todos los procesos de Python han terminado. Puedes cerrar esta pestaña.",
       "sidebar.copy": "MANUTEAA / DBD_ASC<br />FLASK UI · v1",
       "nav.open": "Inicio",
       "nav.perf": "Monitor de rendimiento",
@@ -535,8 +695,6 @@
       "settings.deviceHintGpuMissing": "Runtime GPU faltante.",
       "settings.deviceHintGpuOk": "La inferencia correrá en tu GPU.",
       "settings.deviceHintGpuRequires": "GPU requiere PyTorch + CUDA / DirectML / TensorRT.",
-      "settings.screenLib": "Lib. de pantalla",
-      "settings.screenLibHint": "bettercam es más rápido pero solo Windows (opcional).",
       "settings.monitor": "Monitor",
       "settings.monitorHint": "Se muestrea el centro 224×224 del monitor elegido.",
       "settings.ante": "Retraso ante-frontier",
@@ -659,6 +817,52 @@
       "about.p2": "Presets CPU adaptativos, fijado P-Cores en CPUs híbridas, monitor GPU (solo NVIDIA vía <code>nvidia-smi</code>) y advisor FPS en vivo que compara el FPS medio del tool con el <code>FrameRateLimit</code> del juego.",
       "about.p3": 'Las lecturas de temperatura/potencia CPU requieren <a href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor" target="_blank" rel="noopener">LibreHardwareMonitor</a> instalado y en ejecución (se consulta su namespace WMI).',
       "footer.note": 'Open-source · alternativa drop-in a <code>app.py</code> (Gradio). Fuente: <a href="https://github.com/Manuteaa/dbd_autoSkillCheck" target="_blank" rel="noopener">github.com/Manuteaa/dbd_autoSkillCheck</a>',
+
+      // ── Preflight Advisor ──
+      "preflight.summary.danger": "Preflight: {n} problema(s) bloqueante(s) — la herramienta no arrancará hasta corregirlos.",
+      "preflight.summary.warn":   "Preflight: {n} advertencia(s) — la herramienta funcionará con funcionalidad reducida.",
+      "preflight.summary.info":   "Preflight: {n} nota(s) — informativo, no se requiere acción para arrancar.",
+      "preflight.recommend.danger": "Abre Detalles y ejecuta los comandos sugeridos.",
+      "preflight.recommend.warn":   "Abre Detalles para ver qué está degradado y cómo activarlo.",
+      "preflight.recommend.info":   "Abre Detalles para más información.",
+      "preflight.missing.flask.text":   "Paquete requerido faltante: {pkg} (servidor web).",
+      "preflight.missing.flask.fix":    "pip install {pkg}",
+      "preflight.missing.numpy.text":   "Paquete requerido faltante: {pkg} (tensores / arrays).",
+      "preflight.missing.numpy.fix":    "pip install {pkg}",
+      "preflight.missing.opencv.text":  "Paquete requerido faltante: {pkg} (preprocesado de imagen).",
+      "preflight.missing.opencv.fix":   "pip install {pkg}",
+      "preflight.missing.mss.text":     "Paquete requerido faltante: {pkg} (captura de pantalla).",
+      "preflight.missing.mss.fix":      "pip install {pkg}",
+      "preflight.missing.pillow.text":  "Paquete requerido faltante: {pkg} (codificación de imagen).",
+      "preflight.missing.pillow.fix":   "pip install {pkg}",
+      "preflight.missing.psutil.text":  "Paquete requerido faltante: {pkg} (monitor de CPU).",
+      "preflight.missing.psutil.fix":   "pip install {pkg}",
+      "preflight.missing.onnxruntime.text": "ONNX Runtime no está instalado — la inferencia IA no puede ejecutarse.",
+      "preflight.missing.onnxruntime.fix":  "pip install onnxruntime  (CPU)  O  pip install onnxruntime-gpu  (NVIDIA)",
+      "preflight.models.folderMissing.text": "La carpeta ./models no existe.",
+      "preflight.models.folderMissing.fix":  "mkdir models  y deja un modelo .onnx (o .trt) dentro.",
+      "preflight.models.empty.text": "Carpeta models vacía — no se encontraron archivos .onnx o .trt.",
+      "preflight.models.empty.fix":  "Coloca un modelo .onnx (o .trt) en ./models.",
+      "preflight.models.notFound.text": "El modelo seleccionado «{model}» ya no está en la carpeta models.",
+      "preflight.models.notFound.fix":  "Elige otro modelo del desplegable o restaura el archivo.",
+      "preflight.trt.needsTorch.text":     "Modelo TensorRT seleccionado, pero PyTorch no está instalado.",
+      "preflight.trt.needsTorch.fix":      "Instala PyTorch con CUDA desde https://pytorch.org/get-started/locally/",
+      "preflight.trt.needsTensorrt.text":  "Modelo TensorRT seleccionado, pero el paquete tensorrt no está instalado.",
+      "preflight.trt.needsTensorrt.fix":   "pip install tensorrt  (debe coincidir con tu CUDA toolkit)",
+      "preflight.trt.needsPycuda.text":    "Modelo TensorRT seleccionado, pero pycuda no está instalado.",
+      "preflight.trt.needsPycuda.fix":     "pip install pycuda",
+      "preflight.gpu.needsTorch.text":   "GPU seleccionada, pero PyTorch no está instalado (recomendado para GPU).",
+      "preflight.gpu.needsTorch.fix":    "Instala PyTorch con CUDA desde https://pytorch.org/get-started/locally/",
+      "preflight.gpu.torchNoCuda.text":  "PyTorch es la build de CPU — torch.cuda.is_available() es False.",
+      "preflight.gpu.torchNoCuda.fix":   "Reinstala la build CUDA: pip uninstall torch y luego desde https://pytorch.org",
+      "preflight.gpu.needsOrtGpu.text":  "Solo está instalado ONNX Runtime CPU — la GPU caerá a CPU.",
+      "preflight.gpu.needsOrtGpu.fix":   "pip uninstall onnxruntime && pip install onnxruntime-gpu",
+      "preflight.gpu.noProvider.text":   "Ningún execution provider de GPU disponible (CUDA / DML / TensorRT no registrado).",
+      "preflight.gpu.noProvider.fix":    "Instala onnxruntime-gpu y verifica driver GPU / CUDA toolkit.",
+      "preflight.nvidiaSmi.missing.text": "GPU NVIDIA en uso pero nvidia-smi no se encuentra en PATH.",
+      "preflight.nvidiaSmi.missing.fix":  "Instala/repara el driver NVIDIA — sin nvidia-smi el Performance Monitor estará vacío.",
+      "preflight.python.versionUntested.text": "Python {version} está fuera del rango probado (3.10–3.12).",
+      "preflight.python.versionUntested.fix":  "Puede funcionar; ante errores extraños, usa 3.10–3.12.",
     },
 
     ru: {
@@ -673,6 +877,13 @@
       "sidebar.hits": "Хиты",
       "sidebar.run": "▶ ЗАПУСК",
       "sidebar.stop": "■ СТОП",
+      "sidebar.quit": "⏻ ВЫХОД",
+      "modal.quitTitle": "Выйти из приложения?",
+      "modal.quitBody": "Это остановит обработчик и завершит работу Python-сервера. После этого можно закрыть вкладку.",
+      "modal.quitConfirm": "Выход",
+      "modal.quitCancel": "Отмена",
+      "toast.quitTitle": "Сервер остановлен",
+      "toast.quitBody": "Все процессы Python завершены. Можете закрыть вкладку.",
       "sidebar.copy": "MANUTEAA / DBD_ASC<br />FLASK UI · v1",
       "nav.open": "Главная",
       "nav.perf": "Монитор производительности",
@@ -699,8 +910,6 @@
       "settings.deviceHintGpuMissing": "Среда GPU отсутствует.",
       "settings.deviceHintGpuOk": "Инференс будет работать на вашем GPU.",
       "settings.deviceHintGpuRequires": "GPU требует PyTorch + CUDA / DirectML / TensorRT.",
-      "settings.screenLib": "Библиотека экрана",
-      "settings.screenLibHint": "bettercam быстрее, но только Windows (опционально).",
       "settings.monitor": "Монитор",
       "settings.monitorHint": "Сэмплируется центральный участок 224×224 выбранного монитора.",
       "settings.ante": "Задержка ante-frontier",
@@ -823,10 +1032,65 @@
       "about.p2": "Адаптивные пресеты CPU, закрепление на P-ядрах для гибридных CPU, монитор GPU (только NVIDIA через <code>nvidia-smi</code>) и live FPS-advisor, сравнивающий средний FPS инструмента с <code>FrameRateLimit</code> игры.",
       "about.p3": 'Чтение температуры/мощности CPU требует <a href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor" target="_blank" rel="noopener">LibreHardwareMonitor</a> установленным и запущенным (запрашивается его WMI-namespace).',
       "footer.note": 'Open-source · drop-in альтернатива <code>app.py</code> (Gradio). Источник: <a href="https://github.com/Manuteaa/dbd_autoSkillCheck" target="_blank" rel="noopener">github.com/Manuteaa/dbd_autoSkillCheck</a>',
+
+      // ── Preflight Advisor ──
+      "preflight.summary.danger": "Preflight: {n} критич. проблем(а) — инструмент не запустится, пока не исправите.",
+      "preflight.summary.warn":   "Preflight: {n} предупреждение(й) — инструмент запустится, но с ограничениями.",
+      "preflight.summary.info":   "Preflight: {n} замечание(й) — справочно, для запуска ничего не нужно.",
+      "preflight.recommend.danger": "Откройте «Подробности» и выполните предложенные команды.",
+      "preflight.recommend.warn":   "Откройте «Подробности», чтобы увидеть, что ограничено.",
+      "preflight.recommend.info":   "Откройте «Подробности» для дополнительной информации.",
+      "preflight.missing.flask.text":   "Отсутствует обязательный пакет: {pkg} (веб-сервер).",
+      "preflight.missing.flask.fix":    "pip install {pkg}",
+      "preflight.missing.numpy.text":   "Отсутствует обязательный пакет: {pkg} (тензоры / массивы).",
+      "preflight.missing.numpy.fix":    "pip install {pkg}",
+      "preflight.missing.opencv.text":  "Отсутствует обязательный пакет: {pkg} (предобработка изображений).",
+      "preflight.missing.opencv.fix":   "pip install {pkg}",
+      "preflight.missing.mss.text":     "Отсутствует обязательный пакет: {pkg} (захват экрана).",
+      "preflight.missing.mss.fix":      "pip install {pkg}",
+      "preflight.missing.pillow.text":  "Отсутствует обязательный пакет: {pkg} (кодирование изображений).",
+      "preflight.missing.pillow.fix":   "pip install {pkg}",
+      "preflight.missing.psutil.text":  "Отсутствует обязательный пакет: {pkg} (монитор CPU).",
+      "preflight.missing.psutil.fix":   "pip install {pkg}",
+      "preflight.missing.onnxruntime.text": "ONNX Runtime не установлен — инференс ИИ невозможен.",
+      "preflight.missing.onnxruntime.fix":  "pip install onnxruntime  (CPU)  ИЛИ  pip install onnxruntime-gpu  (NVIDIA)",
+      "preflight.models.folderMissing.text": "Папка ./models не существует.",
+      "preflight.models.folderMissing.fix":  "mkdir models  и положите .onnx (или .trt) модель внутрь.",
+      "preflight.models.empty.text": "Папка models пуста — нет файлов .onnx или .trt.",
+      "preflight.models.empty.fix":  "Положите .onnx (или .trt) модель в ./models.",
+      "preflight.models.notFound.text": "Выбранная модель «{model}» больше не находится в папке models.",
+      "preflight.models.notFound.fix":  "Выберите другую модель в списке или восстановите файл.",
+      "preflight.trt.needsTorch.text":     "Выбрана модель TensorRT, но PyTorch не установлен.",
+      "preflight.trt.needsTorch.fix":      "Установите PyTorch с CUDA с https://pytorch.org/get-started/locally/",
+      "preflight.trt.needsTensorrt.text":  "Выбрана модель TensorRT, но пакет tensorrt не установлен.",
+      "preflight.trt.needsTensorrt.fix":   "pip install tensorrt  (должен совпадать с версией CUDA Toolkit)",
+      "preflight.trt.needsPycuda.text":    "Выбрана модель TensorRT, но pycuda не установлен.",
+      "preflight.trt.needsPycuda.fix":     "pip install pycuda",
+      "preflight.gpu.needsTorch.text":   "Выбран GPU, но PyTorch не установлен (рекомендуется для GPU).",
+      "preflight.gpu.needsTorch.fix":    "Установите PyTorch с CUDA с https://pytorch.org/get-started/locally/",
+      "preflight.gpu.torchNoCuda.text":  "Установлен PyTorch только для CPU — torch.cuda.is_available() = False.",
+      "preflight.gpu.torchNoCuda.fix":   "Переустановите CUDA-сборку: pip uninstall torch и установите с https://pytorch.org",
+      "preflight.gpu.needsOrtGpu.text":  "Установлен только CPU ONNX Runtime — GPU откатится на CPU.",
+      "preflight.gpu.needsOrtGpu.fix":   "pip uninstall onnxruntime && pip install onnxruntime-gpu",
+      "preflight.gpu.noProvider.text":   "Недоступен ни один GPU execution provider (CUDA / DML / TensorRT не зарегистрирован).",
+      "preflight.gpu.noProvider.fix":    "Установите onnxruntime-gpu и проверьте драйвер GPU / CUDA Toolkit.",
+      "preflight.nvidiaSmi.missing.text": "Используется NVIDIA GPU, но nvidia-smi не найден в PATH.",
+      "preflight.nvidiaSmi.missing.fix":  "Установите/восстановите драйвер NVIDIA — без nvidia-smi Performance Monitor пуст.",
+      "preflight.python.versionUntested.text": "Python {version} вне протестированного диапазона (3.10–3.12).",
+      "preflight.python.versionUntested.fix":  "Может работать; при странных ошибках используйте 3.10–3.12.",
     },
   };
 
-  const STORED_LANG = localStorage.getItem("dbdasc_lang");
+  // Dev hatch: visit /?reset (or /?resetLang) once to wipe the saved language
+  // and re-trigger the first-run picker. The query string is stripped so a
+  // page refresh doesn't loop the reset.
+  const _params = new URLSearchParams(window.location.search);
+  const _FORCE_LANG_RESET = _params.has("reset") || _params.has("resetLang");
+  if (_FORCE_LANG_RESET) {
+    localStorage.removeItem("dbdasc_lang");
+    history.replaceState({}, "", window.location.pathname);
+  }
+  const STORED_LANG = _FORCE_LANG_RESET ? null : localStorage.getItem("dbdasc_lang");
   let LANG = STORED_LANG && I18N[STORED_LANG] ? STORED_LANG : "en";
   const HAS_LANG_PREF = !!(STORED_LANG && I18N[STORED_LANG]);
 
@@ -887,9 +1151,8 @@
   const cfg = {
     model: null,
     device: "CPU",
-    monitoring_lib: "mss",
     monitor_id: null,
-    hit_ante: 20,
+    hit_ante: 10,
     nb_cpu_threads: 4,
     cpu_affinity_mask: 0,
   };
@@ -961,7 +1224,10 @@
       modelSel.value = initData.default_model;
       cfg.model = initData.default_model;
     }
-    modelSel.addEventListener("change", () => { cfg.model = modelSel.value; });
+    modelSel.addEventListener("change", () => {
+      cfg.model = modelSel.value;
+      schedulePreflight();
+    });
 
     // ── Device (CPU/GPU) ──
     const sys = initData.system || {};
@@ -978,7 +1244,7 @@
         { label: "GPU", value: "GPU", disabledReason: sys.gpu_unavailable_reason },
       ],
       cfg.device,
-      (v) => { cfg.device = v; updateDeviceSummary(); },
+      (v) => { cfg.device = v; updateDeviceSummary(); schedulePreflight(); },
       (item) => item.value === "GPU" && !gpuAvailable
     );
 
@@ -996,14 +1262,6 @@
         hintEl.textContent = t("cpu.deviceCpuHint", { total: cpu.cores });
       }
     }
-
-    // ── Monitoring lib ──
-    cfg.monitoring_lib = initData.default_monitoring_lib;
-    renderSeg($("cfg-monlib"),
-      initData.monitoring_libs.map(v => ({ label: v, value: v })),
-      cfg.monitoring_lib,
-      async (v) => { cfg.monitoring_lib = v; await refreshMonitors(); }
-    );
 
     // ── Monitors ──
     populateMonitors(initData.monitors);
@@ -1130,11 +1388,17 @@
     // ── Buttons ──
     $("btn-run").addEventListener("click", onRun);
     $("btn-stop").addEventListener("click", onStop);
+    $("btn-quit").addEventListener("click", onQuit);
     $("advisor-close").addEventListener("click", () => {
       $("advisor").classList.add("advisor-hidden");
     });
+    setupPreflightHandlers();
 
     refreshPreview();
+
+    // ── Preflight (kick off + 30s interval; the server caches for 30s anyway) ──
+    schedulePreflight();
+    preflightPollTimer = setInterval(pollPreflight, 30000);
 
     // ── Boot toast ──
     const cpuLine = cpu.is_hybrid
@@ -1176,7 +1440,7 @@
 
   async function refreshMonitors() {
     try {
-      const r = await api(`/api/monitors?monitoring_lib=${encodeURIComponent(cfg.monitoring_lib)}`);
+      const r = await api(`/api/monitors`);
       populateMonitors(r.monitors);
       refreshPreview();
     } catch (e) {
@@ -1186,7 +1450,7 @@
 
   async function refreshPreview() {
     if (cfg.monitor_id == null) return;
-    const url = `/api/preview?monitoring_lib=${encodeURIComponent(cfg.monitoring_lib)}&monitor_id=${cfg.monitor_id}&t=${Date.now()}`;
+    const url = `/api/preview?monitor_id=${cfg.monitor_id}&t=${Date.now()}`;
     const img = $("live-feed");
     img.src = url;
     img.onload = () => {
@@ -1203,12 +1467,21 @@
 
   // ─── Run / Stop ────────────────────────────────────────────────
   async function onRun() {
+    // Client-side guard: don't try to start if there's clearly nothing to load.
+    if (!cfg.model) {
+      toast("error", t("toast.errStart"), t("toast.errModelsBody",
+        { folder: (initData && initData.models_folder) || "models" }), 0);
+      return;
+    }
+    if (cfg.monitor_id == null) {
+      toast("error", t("toast.errStart"), t("toast.errMonitors"), 0);
+      return;
+    }
     $("btn-run").disabled = true;
     try {
       const body = JSON.stringify({
         model: cfg.model,
         device: cfg.device,
-        monitoring_lib: cfg.monitoring_lib,
         monitor_id: cfg.monitor_id,
         hit_ante: cfg.hit_ante,
         nb_cpu_threads: cfg.nb_cpu_threads,
@@ -1219,7 +1492,9 @@
       startLivePoll();
     } catch (e) {
       toast("error", t("toast.errStart"), e.message, 0);
+      // Re-enable RUN so the user can fix the config and retry.
       $("btn-run").disabled = false;
+      $("btn-stop").disabled = true;
     }
   }
 
@@ -1228,10 +1503,42 @@
     try {
       await api("/api/stop", { method: "POST" });
       stopLivePoll();
+      $("btn-run").disabled = false;
     } catch (e) {
       toast("error", t("toast.errStop"), e.message);
+      // Stop failed — the worker may still be running, so let the user retry.
+      $("btn-stop").disabled = false;
     }
-    $("btn-run").disabled = false;
+  }
+
+  async function onQuit() {
+    // Confirm before pulling the rug — there's no undo for terminating the
+    // process, and a stray click shouldn't kill the user's session.
+    const ok = await showConfirm({
+      title: t("modal.quitTitle"),
+      body: t("modal.quitBody"),
+      confirmLabel: t("modal.quitConfirm"),
+      cancelLabel: t("modal.quitCancel"),
+    });
+    if (!ok) return;
+
+    $("btn-quit").disabled = true;
+    $("btn-run").disabled = true;
+    $("btn-stop").disabled = true;
+
+    // Fire-and-forget: the server kills itself ~300ms after replying, so we
+    // can't reliably await the response. Just kick the request and show the
+    // user that they can close the tab. Stop polling so we don't spam a
+    // dying socket with status pings.
+    stopLivePoll();
+    if (statusPollTimer) { clearInterval(statusPollTimer); statusPollTimer = null; }
+
+    try {
+      await api("/api/quit", { method: "POST" });
+    } catch (_) {
+      // Expected — the server may close the socket before responding.
+    }
+    toast("info", t("toast.quitTitle"), t("toast.quitBody"), 0);
   }
 
   function startLivePoll() {
@@ -1249,11 +1556,17 @@
   // ─── Status polling ────────────────────────────────────────────
   let lastStatus = "idle";
   let lastError = null;
+  let pollStatusInflight = false;
 
   async function pollStatus() {
+    // Skip if a previous poll is still running — a stalled /api/status request
+    // would otherwise let new polls pile up every 500ms until the network un-stalls.
+    if (pollStatusInflight) return;
+    pollStatusInflight = true;
     let snap;
     try { snap = await api("/api/status"); }
-    catch (e) { return; }
+    catch (e) { pollStatusInflight = false; return; }
+    try {
 
     lastSnapStatus = snap.status;
     lastSnapAdvice = snap.fps_advice;
@@ -1306,6 +1619,9 @@
       };
       $("lasthit-sub").textContent = snap.last_hit_desc || "—";
       renderDonut(snap.last_hit_probs, snap.last_hit_desc);
+    }
+    } finally {
+      pollStatusInflight = false;
     }
   }
 
@@ -1368,6 +1684,117 @@
               advice.message + (advice.recommendation ? " " + advice.recommendation : ""), 10000);
       }
       prevAdvisorSeverity = sev;
+    }
+  }
+
+  // ─── Preflight advisor (missing packages / GPU runtime / models) ──
+  let preflightPollTimer = null;
+  let preflightDebounceTimer = null;
+  let lastPreflightAdvice = null;
+  let preflightExpanded = false;
+  let preflightDismissedSummary = null; // "danger"|"warn"|"info" if the user dismissed; reset when severity climbs
+
+  async function pollPreflight() {
+    const params = new URLSearchParams();
+    if (cfg.device) params.set("device", cfg.device);
+    if (cfg.model) params.set("model", cfg.model);
+    const qs = params.toString();
+    let advice;
+    try {
+      advice = await api(`/api/preflight${qs ? "?" + qs : ""}`);
+    } catch {
+      return; // probe failed (503) — leave previous banner state alone
+    }
+    lastPreflightAdvice = advice;
+    renderPreflight(advice);
+  }
+
+  function schedulePreflight() {
+    if (preflightDebounceTimer) clearTimeout(preflightDebounceTimer);
+    preflightDebounceTimer = setTimeout(() => {
+      preflightDebounceTimer = null;
+      pollPreflight();
+    }, 200);
+  }
+
+  function renderPreflight(advice) {
+    const banner = $("preflight");
+    if (!banner) return;
+
+    const issues = (advice && advice.issues) || [];
+    const sev = advice && advice.summary;
+
+    if (!advice || sev === "ok" || issues.length === 0) {
+      banner.classList.add("advisor-hidden");
+      banner.classList.remove("severity-info", "severity-warn", "severity-danger");
+      // Reset dismissal once everything's clean again
+      preflightDismissedSummary = null;
+      return;
+    }
+
+    // Re-show the banner if severity has climbed since the last dismiss
+    // (e.g. user dismissed a "warn" banner and then a "danger" issue appeared).
+    const SEV_RANK = { info: 1, warn: 2, danger: 3 };
+    if (preflightDismissedSummary &&
+        SEV_RANK[sev] <= SEV_RANK[preflightDismissedSummary]) {
+      banner.classList.add("advisor-hidden");
+      return;
+    }
+    preflightDismissedSummary = null;
+
+    banner.classList.remove("advisor-hidden", "severity-info", "severity-warn", "severity-danger");
+    banner.classList.add(`severity-${sev}`);
+
+    $("preflight-icon").textContent = sev === "danger" ? "⚠" : (sev === "warn" ? "⚠" : "ℹ");
+    $("preflight-msg").textContent = t(`preflight.summary.${sev}`, { n: issues.length });
+    $("preflight-rec").textContent = t(`preflight.recommend.${sev}`);
+
+    // Item list
+    const list = $("preflight-list");
+    list.innerHTML = "";
+    issues.forEach(issue => {
+      const li = document.createElement("li");
+      li.className = `preflight-item sev-${issue.severity}`;
+      const fmt = issue.fmt || {};
+      const title = t(`${issue.code}.text`, fmt);
+      const fix = t(`${issue.code}.fix`, fmt);
+      const sevIcon = issue.severity === "danger" ? "⚠" : (issue.severity === "warn" ? "⚠" : "ℹ");
+      li.innerHTML = `
+        <div class="preflight-item-icon">${sevIcon}</div>
+        <div class="preflight-item-body">
+          <div class="preflight-item-title">${escapeHtml(title)}</div>
+          <div class="preflight-item-fix">${escapeHtml(fix)}</div>
+        </div>`;
+      list.appendChild(li);
+    });
+
+    // Auto-expand the detail list the first time a danger banner appears,
+    // since the user *needs* to see the fix command to proceed.
+    if (sev === "danger" && !preflightExpanded) {
+      preflightExpanded = true;
+      $("preflight-toggle").setAttribute("aria-expanded", "true");
+      list.hidden = false;
+    }
+  }
+
+  function setupPreflightHandlers() {
+    const toggle = $("preflight-toggle");
+    const list = $("preflight-list");
+    const close = $("preflight-close");
+    if (toggle && list) {
+      toggle.addEventListener("click", () => {
+        preflightExpanded = !preflightExpanded;
+        toggle.setAttribute("aria-expanded", String(preflightExpanded));
+        list.hidden = !preflightExpanded;
+      });
+    }
+    if (close) {
+      close.addEventListener("click", () => {
+        const banner = $("preflight");
+        // Remember the severity we dismissed at — only re-show if a worse one appears.
+        preflightDismissedSummary = lastPreflightAdvice && lastPreflightAdvice.summary;
+        banner.classList.add("advisor-hidden");
+      });
     }
   }
 
@@ -1655,14 +2082,21 @@
     pollPerf();
     perfPollTimer = setInterval(pollPerf, 600);
   }
+  let pollPerfInflight = false;
   async function pollPerf() {
+    if (pollPerfInflight) return;
+    pollPerfInflight = true;
     let snap;
     try { snap = await api("/api/perf"); }
-    catch { return; }
-    lastPerfSnap = snap;
-    renderGpuPerf(snap.gpu);
-    renderCpuPerf(snap.cpu);
-    pushPerfChartSamples(snap);
+    catch { pollPerfInflight = false; return; }
+    try {
+      lastPerfSnap = snap;
+      renderGpuPerf(snap.gpu);
+      renderCpuPerf(snap.cpu);
+      pushPerfChartSamples(snap);
+    } finally {
+      pollPerfInflight = false;
+    }
   }
 
   function fmt(v, suffix = "", digits = 0) {
@@ -1927,7 +2361,7 @@
       infoLoaded = true;
       renderInfoPage(data);
     } catch (e) {
-      $("info-env").innerHTML = `<div class="info-row"><span class="info-row-key">Error</span><span class="info-row-val red">${e.message}</span></div>`;
+      $("info-env").innerHTML = `<div class="info-row"><span class="info-row-key">Error</span><span class="info-row-val red">${escapeHtml(e.message || String(e))}</span></div>`;
     }
   }
 

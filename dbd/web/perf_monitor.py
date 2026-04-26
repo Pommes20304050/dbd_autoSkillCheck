@@ -8,6 +8,7 @@ that LHM publishes when running externally as admin.
 """
 
 import ctypes
+import math
 import os
 import shutil
 import subprocess
@@ -74,9 +75,14 @@ def _to_float(s):
     if s is None or s == "" or (isinstance(s, str) and s.lower() in ("[n/a]", "n/a", "[not supported]")):
         return None
     try:
-        return float(s)
+        v = float(s)
     except (TypeError, ValueError):
         return None
+    # Reject NaN/Inf — Flask's default jsonify will silently emit "NaN"/"Infinity"
+    # which is not strict JSON and breaks JSON.parse on the client.
+    if not math.isfinite(v):
+        return None
+    return v
 
 
 # ─── GPU (nvidia-smi) ──────────────────────────────────────────────
@@ -101,7 +107,12 @@ def gpu_stats():
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         ).strip()
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError, OSError) as e:
-        return {"available": False, "reason": f"nvidia-smi failed: {e}"}
+        # Cache the failure too — otherwise a stuck driver will let every
+        # poll re-spawn nvidia-smi and burn 600ms × 2s for nothing.
+        snap = {"available": False, "reason": f"nvidia-smi failed: {e}"}
+        _GPU_CACHE["ts"] = now
+        _GPU_CACHE["value"] = snap
+        return snap
 
     line = out.splitlines()[0] if out else ""
     parts = [p.strip() for p in line.split(",")]

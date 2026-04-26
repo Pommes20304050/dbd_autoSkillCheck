@@ -10,3 +10,10 @@ dist/
 build/
 python-embed*/
 release*/
+
+# Local virtualenv
+.venv/
+
+# Local benchmark output
+bench_err.txt
+bench_out.txt

@@ -40,14 +40,15 @@ pythonnet>=3.0 ; sys_platform == "win32"
 # Install matching your CUDA toolkit, then convert the .onnx → .trt model.
 # tensorrt
 
-# ── Optional: faster Windows screen capture ─────────────────────
-# 2-4× faster than MSS on Windows. Falls back to MSS if missing.
-bettercam ; sys_platform == "win32"
-
 # ── Optional: native Windows key sender (avoids PyAutoGUI) ──────
 # Not directly imported (directkeys.py uses ctypes), but env_info.py reports
 # its install state on the Info page. Safe to omit if you don't care.
 pywin32 ; sys_platform == "win32"
+
+# ── Linux/macOS key sender ──────────────────────────────────────
+# directkeys.py imports pynput on non-Windows. Without it, auto-hit
+# silently no-ops. Wayland may need uinput permissions; X11 works as-is.
+pynput ; sys_platform != "win32"
 
 # ╔════════════════════════════════════════════════════════════════╗
 # ║ LibreHardwareMonitor (CPU temp + power on the Performance page)║

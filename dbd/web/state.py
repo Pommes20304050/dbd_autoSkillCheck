@@ -28,7 +28,7 @@ class AppState:
 
     def snapshot(self):
         with self._lock:
-            now = time.time()
+            now = time.monotonic()
             recent_hits = [t for t in self.hit_log if now - t <= 60]
             history = list(self.fps_history)
             return {
@@ -42,7 +42,7 @@ class AppState:
                 "hit_count": self.hit_count,
                 "hits_per_minute": len(recent_hits),
                 "last_hit_desc": self.last_hit_desc,
-                "last_hit_probs": self.last_hit_probs,
+                "last_hit_probs": dict(self.last_hit_probs) if self.last_hit_probs else None,
                 "last_hit_at": self.last_hit_at,
             }
 
@@ -58,6 +58,14 @@ class AppState:
             history = list(self.fps_history)
         return self._avg_locked(history, window=window, min_samples=min_samples)
 
+    def get_live_frame(self):
+        with self._lock:
+            return self.live_frame_jpeg
+
+    def get_last_hit_frame(self):
+        with self._lock:
+            return self.last_hit_frame_jpeg
+
     def set_status(self, status, error=None, provider=None):
         with self._lock:
             self.status = status
@@ -66,10 +74,30 @@ class AppState:
             if provider is not None:
                 self.provider = provider
             if status == "idle":
+                # Clear error only on explicit idle. Worker-end paths use
+                # set_idle_unless_error() to preserve a final error message.
                 self.error = None
+
+    def set_idle_unless_error(self):
+        """Used by the worker's finally — if a runtime exception already
+        flipped us to "error", keep that state (and the message) so the UI
+        can show what went wrong. Otherwise return cleanly to idle.
+        Also resets the live-FPS reading AND the rolling FPS history so a
+        stopped run doesn't leave a stale FPS number on the sidebar / mini-
+        stats (Avg FPS reads from fps_history)."""
+        with self._lock:
+            self.tool_fps = 0.0
+            self.fps_history.clear()
+            if self.status == "error":
+                return
+            self.status = "idle"
+            self.error = None
 
     def reset_for_run(self):
         with self._lock:
+            self.status = "idle"
+            self.provider = None
+            self.error = None
             self.tool_fps = 0.0
             self.fps_history.clear()
             self.hit_count = 0
@@ -79,7 +107,6 @@ class AppState:
             self.last_hit_frame_jpeg = None
             self.last_hit_at = None
             self.live_frame_jpeg = None
-            self.error = None
 
     def update_fps(self, fps):
         with self._lock:
@@ -87,14 +114,18 @@ class AppState:
             self.fps_history.append(fps)
 
     def update_live_frame(self, jpeg_bytes):
+        if not jpeg_bytes:
+            return
         with self._lock:
             self.live_frame_jpeg = jpeg_bytes
 
     def record_hit(self, jpeg_bytes, desc, probs):
+        now = time.monotonic()
         with self._lock:
             self.hit_count += 1
-            self.hit_log.append(time.time())
+            self.hit_log.append(now)
             self.last_hit_desc = desc
             self.last_hit_probs = probs
-            self.last_hit_frame_jpeg = jpeg_bytes
-            self.last_hit_at = time.time()
+            if jpeg_bytes:
+                self.last_hit_frame_jpeg = jpeg_bytes
+            self.last_hit_at = time.time()  # wall-clock for UI display only

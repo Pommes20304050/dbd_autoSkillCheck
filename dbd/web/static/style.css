@@ -138,6 +138,15 @@ code {
 .sidebar-btn-stop:hover:not(:disabled) {
   background: var(--bg-hover); border-color: var(--red); color: var(--red);
 }
+.sidebar-btn-quit {
+  background: transparent; color: var(--red);
+  border: 1px solid var(--red); width: 100%;
+  padding: 10px 14px; font-size: 12px; letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.sidebar-btn-quit:hover:not(:disabled) {
+  background: var(--red); color: #fff;
+}
 .sidebar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── Sidebar navigation (page switcher) ──────────────────────── */
@@ -254,6 +263,81 @@ code {
 .chip-pct {
   font-weight: 800; color: var(--orange);
   font-size: 12px; min-width: 40px; text-align: right;
+}
+
+/* ══ Preflight Banner (dependency / runtime checks) ══════════════ */
+
+.preflight-banner {
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-2);
+  background: var(--bg-card);
+  overflow: hidden;
+  transition: all 0.25s;
+}
+.preflight-banner.advisor-hidden { display: none; }
+.preflight-banner.severity-warn {
+  border-color: rgba(255, 184, 0, 0.4);
+  background: linear-gradient(90deg, rgba(255, 184, 0, 0.08), rgba(255, 184, 0, 0.02));
+}
+.preflight-banner.severity-danger {
+  border-color: rgba(255, 59, 48, 0.5);
+  background: linear-gradient(90deg, rgba(255, 59, 48, 0.1), rgba(255, 59, 48, 0.02));
+}
+.preflight-banner.severity-info {
+  border-color: var(--border-2);
+  background: var(--bg-card);
+}
+.preflight-head {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px;
+}
+.preflight-summary { flex: 1; min-width: 0; }
+.severity-warn   .preflight-banner .advisor-icon,
+.preflight-banner.severity-warn   .advisor-icon { color: var(--amber); }
+.preflight-banner.severity-danger .advisor-icon { color: var(--red); }
+.preflight-banner.severity-info   .advisor-icon { color: var(--text-dim); }
+.preflight-toggle {
+  background: transparent; color: var(--text-muted);
+  border: none; font-size: 16px; padding: 4px 10px;
+  border-radius: 6px;
+  transition: transform 0.2s;
+}
+.preflight-toggle:hover { background: var(--bg-hover); color: var(--text); }
+.preflight-toggle[aria-expanded="true"] { transform: rotate(180deg); }
+.preflight-list {
+  list-style: none;
+  margin: 0; padding: 0 18px 14px 18px;
+  border-top: 1px solid var(--border);
+}
+.preflight-list[hidden] { display: none; }
+.preflight-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.preflight-item:last-child { border-bottom: none; }
+.preflight-item-icon {
+  width: 18px; flex-shrink: 0; text-align: center;
+  font-size: 14px; line-height: 18px;
+}
+.preflight-item.sev-danger .preflight-item-icon { color: var(--red); }
+.preflight-item.sev-warn   .preflight-item-icon { color: var(--amber); }
+.preflight-item.sev-info   .preflight-item-icon { color: var(--text-dim); }
+.preflight-item-body { flex: 1; min-width: 0; }
+.preflight-item-msg {
+  font-size: 13px; font-weight: 500; color: var(--text);
+  margin-bottom: 2px;
+}
+.preflight-item-fix {
+  font-size: 11px; color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg-3);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 4px;
+  word-break: break-all;
 }
 
 /* ══ FPS Advisor Banner ══════════════════════════════════════════ */

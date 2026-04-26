@@ -13,6 +13,27 @@ import platform
 import shutil
 import subprocess
 import sys
+import time
+
+
+# Cache the whole collect() result for a short window so repeatedly opening
+# the Info page doesn't re-spawn nvidia-smi / nvcc / re-import torch.
+_CACHE = {"ts": 0.0, "value": None}
+_CACHE_TTL_S = 60.0
+
+
+def _redact(p):
+    """Replace the user's home directory with `~` so /api/info doesn't leak
+    the OS username to the browser."""
+    if not p:
+        return p
+    try:
+        home = os.path.expanduser("~")
+        if home and home in p:
+            return p.replace(home, "~")
+    except Exception:
+        pass
+    return p
 
 
 # (display_name, dist_name, optional?, role)
@@ -27,7 +48,6 @@ REQUIRED_PACKAGES = [
     ("ONNX Runtime GPU","onnxruntime-gpu",True, "AI inference (CUDA)"),
     ("PyTorch",        "torch",          True,  "AI inference (alt.)"),
     ("TensorRT",       "tensorrt",       True,  "AI inference (NVIDIA)"),
-    ("BetterCam",      "bettercam",      True,  "fast Windows screen capture"),
     ("pywin32",        "pywin32",        True,  "Windows key sender"),
 ]
 
@@ -45,7 +65,7 @@ def _python_info():
     return {
         "version": sys.version.split()[0],
         "implementation": platform.python_implementation(),
-        "executable": sys.executable,
+        "executable": _redact(sys.executable),
         "bits": "64-bit" if sys.maxsize > 2**32 else "32-bit",
     }
 
@@ -121,8 +141,8 @@ def _cuda_toolkit():
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError, OSError):
             pass
     return {
-        "home": home,
-        "nvcc_path": nvcc,
+        "home": _redact(home),
+        "nvcc_path": _redact(nvcc),
         "version": version,
     }
 
@@ -145,9 +165,16 @@ def _torch_cuda():
 
 
 def collect():
+    now = time.monotonic()
+    if _CACHE["value"] is not None and (now - _CACHE["ts"]) < _CACHE_TTL_S:
+        return _CACHE["value"]
+
     pkgs = []
     for display, dist, optional, role in REQUIRED_PACKAGES:
-        v = _pkg_version(dist)
+        try:
+            v = _pkg_version(dist)
+        except Exception:
+            v = None
         pkgs.append({
             "display_name": display,
             "dist": dist,
@@ -157,11 +184,21 @@ def collect():
             "version": v,
         })
 
-    return {
-        "python": _python_info(),
-        "os": _os_info(),
-        "nvidia": _nvidia_info(),
-        "cuda_toolkit": _cuda_toolkit(),
-        "torch": _torch_cuda(),
+    # Each sub-probe is wrapped — a single failure shouldn't blank the whole page.
+    def _safe(fn, fallback):
+        try:
+            return fn()
+        except Exception as e:
+            return {**fallback, "error": str(e)}
+
+    result = {
+        "python": _safe(_python_info, {"version": None}),
+        "os": _safe(_os_info, {"system": None}),
+        "nvidia": _safe(_nvidia_info, {"available": False, "reason": "probe failed"}),
+        "cuda_toolkit": _safe(_cuda_toolkit, {"home": None, "nvcc_path": None, "version": None}),
+        "torch": _safe(_torch_cuda, {"installed": False}),
         "packages": pkgs,
     }
+    _CACHE["ts"] = now
+    _CACHE["value"] = result
+    return result

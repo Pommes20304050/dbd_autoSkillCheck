@@ -2,15 +2,59 @@ import configparser
 import os
 import re
 import shutil
+import sys
+import threading
 from pathlib import Path
+
+try:
+    import psutil
+    _PSUTIL_OK = True
+except ImportError:
+    _PSUTIL_OK = False
 
 
 GAME_USER_SETTINGS_RELATIVE = Path("DeadByDaylight/Saved/Config/WindowsClient/GameUserSettings.ini")
+# DBD only ships on Windows — its INI lives under %LOCALAPPDATA%. On Linux/macOS
+# the file does not exist, so we shortcut the read/write paths and the UI shows
+# a "not supported on this OS" hint instead of a misleading "INI not found".
+_IS_WINDOWS = sys.platform.startswith("win")
+# Serializes /api/set-fps-cap so two parallel POSTs (or this app and the game
+# itself rewriting the file on shutdown) can't interleave a read-modify-write.
+_INI_WRITE_LOCK = threading.Lock()
 # DBD subclasses UE's GameUserSettings — its custom section comes first; standard UE section is the fallback.
 DBD_SECTIONS = ("/Script/DeadByDaylight.DBDGameUserSettings", "/Script/Engine.GameUserSettings")
 
 # Standard caps the user can pick from the UI. 120 is the upper bound DBD itself enforces in the menu.
 STANDARD_CAPS = [30, 60, 90, 120]
+
+# DBD process names — checked before writing the INI. If DBD is running, our
+# edit is doomed: DBD only reads GameUserSettings.ini at startup, AND it
+# rewrites the file with its in-memory settings when it exits, silently
+# undoing our change. Refusing the write up-front beats a confusing
+# "I clicked 30 but the game stayed at 120".
+_DBD_PROCESS_NAMES = (
+    "deadbydaylight-win64-shipping.exe",
+    "deadbydaylight.exe",
+)
+
+
+def _is_dbd_running():
+    """True if a DBD-looking process is alive. Returns False on any error
+    (psutil missing, permissions, race) — we'd rather attempt the write than
+    block the user because of a probe failure."""
+    if not _PSUTIL_OK:
+        return False
+    try:
+        for p in psutil.process_iter(["name"]):
+            try:
+                name = (p.info.get("name") or "").lower()
+            except Exception:
+                continue
+            if name in _DBD_PROCESS_NAMES:
+                return True
+    except Exception:
+        return False
+    return False
 
 
 def _localappdata() -> Path:
@@ -22,6 +66,8 @@ def find_ini() -> Path:
 
 
 def read_game_fps_cap():
+    if not _IS_WINDOWS:
+        return None, "not_windows", str(find_ini())
     ini_path = find_ini()
     if not ini_path.exists():
         return None, "ini_not_found", str(ini_path)
@@ -53,35 +99,56 @@ def set_game_fps_cap(new_cap):
     Updates BOTH `frameratelimit` and `fpslimitmode` in DBD's custom section.
     Preserves the original line ordering / formatting (does NOT round-trip via configparser).
     Returns (ok: bool, message: str)."""
+    if not _IS_WINDOWS:
+        return False, "FPS cap writing is only supported on Windows (Dead by Daylight is Windows-only)."
+    if not isinstance(new_cap, int) or isinstance(new_cap, bool):
+        return False, f"Invalid cap {new_cap!r}. Must be an integer."
     if new_cap not in STANDARD_CAPS:
         return False, f"Invalid cap {new_cap}. Must be one of {STANDARD_CAPS}."
 
-    ini_path = find_ini()
-    if not ini_path.exists():
-        return False, f"INI not found: {ini_path}"
+    if _is_dbd_running():
+        return False, ("Dead by Daylight is running — close the game first, "
+                       "then change the FPS cap. DBD overwrites GameUserSettings.ini "
+                       "on exit, so any change made while it's running is lost.")
 
-    try:
-        text = ini_path.read_text(encoding="utf-8-sig")
-    except OSError as e:
-        return False, f"Read failed: {e}"
+    with _INI_WRITE_LOCK:
+        ini_path = find_ini()
+        if not ini_path.exists():
+            return False, f"INI not found: {ini_path}"
 
-    # Make a one-time backup the first time we touch the file, so the user
-    # can restore the pristine DBD config if anything goes sideways.
-    backup = ini_path.with_suffix(ini_path.suffix + ".dbd-asc-backup")
-    if not backup.exists():
         try:
-            shutil.copy2(ini_path, backup)
-        except OSError:
-            pass  # backup is best-effort
+            text = ini_path.read_text(encoding="utf-8-sig")
+        except OSError as e:
+            return False, f"Read failed: {e}"
 
-    new_text, replaced_keys = _replace_fps_keys_in_text(text, float(new_cap))
-    if not replaced_keys:
-        return False, "No FrameRateLimit / FPSLimitMode keys found to update."
+        # Make a one-time backup the first time we touch the file, so the user
+        # can restore the pristine DBD config if anything goes sideways.
+        backup = ini_path.with_suffix(ini_path.suffix + ".dbd-asc-backup")
+        if not backup.exists():
+            try:
+                shutil.copy2(ini_path, backup)
+            except OSError as e:
+                # Backup failure is non-fatal but worth surfacing — if a later
+                # write also fails, the user still has the original on disk.
+                print(f"Warning: FPS-cap backup failed: {e}")
 
-    try:
-        ini_path.write_text(new_text, encoding="utf-8")
-    except OSError as e:
-        return False, f"Write failed: {e}"
+        new_text, replaced_keys = _replace_fps_keys_in_text(text, float(new_cap))
+        if not replaced_keys:
+            return False, "No FrameRateLimit / FPSLimitMode keys found to update."
+
+        # Atomic write: write a tmp file then os.replace so a crash mid-write
+        # never leaves a half-written GameUserSettings.ini.
+        tmp_path = ini_path.with_suffix(ini_path.suffix + ".dbd-asc-tmp")
+        try:
+            tmp_path.write_text(new_text, encoding="utf-8")
+            os.replace(tmp_path, ini_path)
+        except OSError as e:
+            try:
+                if tmp_path.exists():
+                    tmp_path.unlink()
+            except OSError:
+                pass
+            return False, f"Write failed: {e}"
 
     return True, f"Set FPS cap to {new_cap}. Restart Dead by Daylight for it to take effect. (Updated: {', '.join(replaced_keys)})"
 
@@ -158,6 +225,14 @@ def build_advice(tool_fps_avg):
         "recommended_cap": None,
     }
 
+    if status == "not_windows":
+        return {
+            **base,
+            "game_fps_cap": None,
+            "severity": "info",
+            "message": "Game FPS cap reading is Windows-only (Dead by Daylight does not run on this OS).",
+            "recommendation": None,
+        }
     if status != "ok":
         return {
             **base,

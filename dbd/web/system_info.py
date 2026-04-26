@@ -220,19 +220,33 @@ def p_physical_affinity_mask(pe, n=None):
 
 def set_process_affinity(mask):
     """Pin the current process to the given affinity mask. Returns True on success.
-    No-op + False on non-Windows or invalid mask."""
-    if mask == 0 or not sys.platform.startswith("win"):
+    Falls back to os.sched_setaffinity on Linux. No-op + False on macOS or
+    when the OS rejects the mask."""
+    if mask == 0:
         return False
-    try:
-        from ctypes import wintypes
-        kernel32 = ctypes.windll.kernel32
-        kernel32.GetCurrentProcess.restype = wintypes.HANDLE
-        kernel32.SetProcessAffinityMask.argtypes = [wintypes.HANDLE, ctypes.c_size_t]
-        kernel32.SetProcessAffinityMask.restype = wintypes.BOOL
-        h = kernel32.GetCurrentProcess()
-        return bool(kernel32.SetProcessAffinityMask(h, ctypes.c_size_t(mask)))
-    except Exception:
-        return False
+    if sys.platform.startswith("win"):
+        try:
+            from ctypes import wintypes
+            kernel32 = ctypes.windll.kernel32
+            kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+            kernel32.SetProcessAffinityMask.argtypes = [wintypes.HANDLE, ctypes.c_size_t]
+            kernel32.SetProcessAffinityMask.restype = wintypes.BOOL
+            h = kernel32.GetCurrentProcess()
+            return bool(kernel32.SetProcessAffinityMask(h, ctypes.c_size_t(mask)))
+        except Exception:
+            return False
+    # Linux exposes os.sched_setaffinity; macOS does not have a per-process
+    # CPU affinity API at all and we can't fake it.
+    if hasattr(os, "sched_setaffinity"):
+        try:
+            cpus = {i for i in range(256) if mask & (1 << i)}
+            if not cpus:
+                return False
+            os.sched_setaffinity(0, cpus)
+            return True
+        except (OSError, AttributeError):
+            return False
+    return False
 
 
 # ---------- Adaptive presets ----------

@@ -88,6 +88,7 @@
       </nav>
 
       <div class="sidebar-footer">
+        <button class="sidebar-btn sidebar-btn-quit" id="btn-quit" data-i18n="sidebar.quit">⏻ QUIT</button>
         <div class="sidebar-copy" data-i18n-html="sidebar.copy">
           MANUTEAA / DBD_ASC<br />
           FLASK UI · v1
@@ -121,6 +122,20 @@
         </div>
       </div>
 
+      <!-- PREFLIGHT BANNER — surfaces missing packages / drivers / runtimes -->
+      <div class="preflight-banner advisor-hidden" id="preflight" role="region" aria-label="Preflight checks">
+        <div class="preflight-head">
+          <div class="advisor-icon" id="preflight-icon">⚠</div>
+          <div class="preflight-summary">
+            <div class="advisor-msg" id="preflight-msg"></div>
+            <div class="advisor-rec" id="preflight-rec"></div>
+          </div>
+          <button class="preflight-toggle" id="preflight-toggle" aria-expanded="false" aria-controls="preflight-list" title="Toggle details">▾</button>
+          <button class="advisor-close" id="preflight-close" aria-label="Dismiss" title="Dismiss">✕</button>
+        </div>
+        <ul class="preflight-list" id="preflight-list" hidden></ul>
+      </div>
+
       <!-- FPS ADVISOR BANNER (shown only on Open page) -->
       <div class="advisor-banner advisor-hidden" id="advisor">
         <div class="advisor-icon" id="advisor-icon">⚠</div>
@@ -128,7 +143,7 @@
           <div class="advisor-msg" id="advisor-msg"></div>
           <div class="advisor-rec" id="advisor-rec"></div>
         </div>
-        <button class="advisor-close" id="advisor-close" title="Dismiss">✕</button>
+        <button class="advisor-close" id="advisor-close" aria-label="Dismiss" title="Dismiss">✕</button>
       </div>
 
       <!-- ══════════════════════════════════════════════════════════
@@ -159,12 +174,6 @@
               </label>
               <div class="seg-control" id="cfg-device"></div>
               <div class="setting-hint" id="cfg-device-hint" data-i18n="settings.deviceHintGpuRequires">GPU requires PyTorch + CUDA / DirectML / TensorRT.</div>
-            </div>
-
-            <div class="setting-block">
-              <label class="setting-label" data-i18n="settings.screenLib">Screen Lib</label>
-              <div class="seg-control" id="cfg-monlib"></div>
-              <div class="setting-hint" data-i18n="settings.screenLibHint">bettercam is faster but Windows-only and optional.</div>
             </div>
 
             <div class="setting-block">
