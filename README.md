@@ -34,6 +34,12 @@ This is being prepared for an upstream merge — see the dedicated [Flask UI sec
 
 <table>
   <tr>
+    <td align="center"><img src="images/Mainpage1.png" alt="Open page — top"/><br/><sub><b>Open page (top)</b> — model picker, device (CPU/GPU), screen-capture backend (MSS / BetterCam), monitor selector, anti-frontier delay, adaptive CPU workload preset.</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="images/Mainpage2.png" alt="Open page — bottom"/><br/><sub><b>Open page (bottom)</b> — live 224×224 monitor feed, last detected skill check with confidence, in-UI editable FPS cap with 30/60/90/120 presets that round-trip with <code>GameUserSettings.ini</code>.</sub></td>
+  </tr>
+  <tr>
     <td align="center"><img src="images/Performance.png" alt="Performance Monitor"/><br/><sub><b>Performance Monitor</b> — live CPU/GPU telemetry with switchable line chart (FPS · GPU% · VRAM · Temp), per-core load, package power & temperature.</sub></td>
   </tr>
   <tr>
