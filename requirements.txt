@@ -1,0 +1,74 @@
+# Runtime dependencies for dbd_autoSkillCheck (Flask + Gradio UIs).
+# Install with:
+#   pip install -r requirements.txt
+#
+# Training-only deps (torch, pytorch-lightning, torchmetrics, torchvision, tqdm)
+# are NOT listed here — install them manually if you want to retrain the model.
+
+# ── Web UIs ─────────────────────────────────────────────────────
+flask>=3.0
+gradio
+
+# ── Core inference / image pipeline ─────────────────────────────
+numpy
+opencv-python
+mss
+pillow
+
+# ── Performance monitor (Performance page) ──────────────────────
+# psutil drives the per-core CPU bars + total utilization graph.
+psutil>=5.9
+
+# pythonnet loads LibreHardwareMonitorLib.dll directly to read CPU package
+# temperature + power. Without it the Performance page falls back to the
+# slower WMI route (which needs LHM running externally as admin with
+# Options > Publish to WMI enabled). The direct path needs the Flask server
+# itself to run as Administrator, but no LHM GUI / WMI dance.
+pythonnet>=3.0 ; sys_platform == "win32"
+
+# ── AI inference (pick ONE of the two — they share DLLs and conflict) ──
+# CPU baseline:                         pip install onnxruntime
+# NVIDIA GPU (recommended on this rig): pip install onnxruntime-gpu
+# See https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#requirements
+# Listing neither here so an existing GPU install isn't clobbered by a CPU one.
+
+# ── Optional: PyTorch (alt. inference backend, used by some scripts) ──
+# Install the CUDA build from https://pytorch.org/get-started/locally/ — do
+# not pip-install plain `torch` here, you'll get the CPU wheel.
+
+# ── Optional: TensorRT (NVIDIA, fastest path) ───────────────────
+# Install matching your CUDA toolkit, then convert the .onnx → .trt model.
+# tensorrt
+
+# ── Optional: faster Windows screen capture ─────────────────────
+# 2-4× faster than MSS on Windows. Falls back to MSS if missing.
+bettercam ; sys_platform == "win32"
+
+# ── Optional: native Windows key sender (avoids PyAutoGUI) ──────
+# Not directly imported (directkeys.py uses ctypes), but env_info.py reports
+# its install state on the Info page. Safe to omit if you don't care.
+pywin32 ; sys_platform == "win32"
+
+# ╔════════════════════════════════════════════════════════════════╗
+# ║ LibreHardwareMonitor (CPU temp + power on the Performance page)║
+# ╠════════════════════════════════════════════════════════════════╣
+# ║ NOT a Python package — it's a free .NET app for Windows.       ║
+# ║ Without it the Performance page CPU card shows "—" for         ║
+# ║ Temperature/Power and an in-app hint pointing at the project.  ║
+# ║                                                                ║
+# ║ Install via winget (recommended):                              ║
+# ║   winget install LibreHardwareMonitor.LibreHardwareMonitor     ║
+# ║                                                                ║
+# ║ Or download the installer:                                     ║
+# ║   https://github.com/LibreHardwareMonitor/LibreHardwareMonitor ║
+# ║                                                                ║
+# ║ With pythonnet installed, the Flask server reads the DLL       ║
+# ║ directly — just run app_flask.py as Administrator, no need to  ║
+# ║ launch the LHM GUI or fiddle with WMI publishing.              ║
+# ║                                                                ║
+# ║ If pythonnet is missing or the server isn't elevated, the page ║
+# ║ falls back to WMI, which requires:                             ║
+# ║   1. Launch LibreHardwareMonitor.exe as Admin                  ║
+# ║   2. Options → Publish to WMI                                  ║
+# ║   3. Keep it running while the Flask UI is open                ║
+# ╚════════════════════════════════════════════════════════════════╝

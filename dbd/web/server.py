@@ -10,7 +10,7 @@ import numpy as np
 from dbd.utils.monitoring_mss import Monitoring_mss
 from dbd.web.state import AppState
 from dbd.web.inference_worker import InferenceWorker, BETTERCAM_OK, make_monitoring
-from dbd.web import fps_advisor, system_info
+from dbd.web import fps_advisor, system_info, perf_monitor, env_info
 
 if BETTERCAM_OK:
     from dbd.utils.monitoring_bettercam import Monitoring_bettercam
@@ -71,8 +71,9 @@ def create_app():
 
         cpu = system_info.detect_cpu()
         gpu = system_info.detect_gpu()
-        cpu_presets = system_info.adaptive_cpu_presets(cpu["cores"])
-        default_threads = system_info.default_cpu_threads(cpu["cores"])
+        pe = system_info.detect_pe_cores()
+        cpu_presets = system_info.adaptive_cpu_presets(cpu["cores"], pe)
+        default_threads = system_info.default_cpu_threads(cpu["cores"], pe)
 
         gpu_available = gpu["gpu_summary"] is not None
         gpu_reason = system_info.gpu_unavailable_reason(gpu)
@@ -85,7 +86,9 @@ def create_app():
             "default_device": "GPU" if gpu_available else "CPU",
             "monitoring_libs": monitoring_libs,
             "default_monitoring_lib": monitoring_libs[0],
-            "cpu_presets": [{"label": l, "threads": t} for l, t in cpu_presets],
+            "cpu_presets": [
+                {"label": l, "threads": t, "affinity_mask": m} for l, t, m in cpu_presets
+            ],
             "default_cpu_threads": default_threads,
             "default_hit_ante": 20,
             "monitors": _list_monitors(monitoring_libs[0]),
@@ -151,6 +154,24 @@ def create_app():
         avg = snap["tool_fps_avg"] if snap["status"] == "running" else None
         return jsonify(fps_advisor.build_advice(avg))
 
+    @app.route("/api/perf")
+    def api_perf():
+        return jsonify(perf_monitor.perf_snapshot())
+
+    @app.route("/api/info")
+    def api_info():
+        return jsonify(env_info.collect())
+
+    @app.route("/api/set-fps-cap", methods=["POST"])
+    def api_set_fps_cap():
+        body = request.get_json(silent=True) or {}
+        try:
+            new_cap = int(body.get("cap"))
+        except (TypeError, ValueError):
+            return jsonify({"ok": False, "error": "cap must be an integer"}), 400
+        ok, msg = fps_advisor.set_game_fps_cap(new_cap)
+        return jsonify({"ok": ok, "message": msg, "cap": new_cap}), (200 if ok else 400)
+
     @app.route("/api/start", methods=["POST"])
     def api_start():
         if state.status in ("starting", "running"):
@@ -163,6 +184,7 @@ def create_app():
         monitor_id = body.get("monitor_id")
         hit_ante = int(body.get("hit_ante", 20))
         nb_cpu_threads = int(body.get("nb_cpu_threads", 4))
+        cpu_affinity_mask = int(body.get("cpu_affinity_mask", 0))
 
         if not model_name:
             return jsonify({"ok": False, "error": "model required"}), 400
@@ -179,6 +201,7 @@ def create_app():
             "monitor_id": int(monitor_id),
             "hit_ante": hit_ante,
             "nb_cpu_threads": nb_cpu_threads,
+            "cpu_affinity_mask": cpu_affinity_mask,
         }
 
         state.reset_for_run()

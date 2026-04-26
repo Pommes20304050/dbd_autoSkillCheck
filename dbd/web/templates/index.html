@@ -13,6 +13,35 @@
   <!-- ══ TOASTS ═════════════════════════════════════════════════ -->
   <div class="toast-container" id="toasts"></div>
 
+  <!-- ══ FIRST-RUN LANGUAGE PICKER ══════════════════════════════ -->
+  <div class="modal-overlay" id="lang-modal" hidden>
+    <div class="modal-card lang-modal-card">
+      <div class="modal-icon">🌐</div>
+      <div class="modal-title">Select your language</div>
+      <div class="modal-body">Choose the language for the interface.<br>You can change this later in Settings.</div>
+      <div class="lang-modal-grid">
+        <button class="lang-btn" data-lang="en"><span class="lang-flag">🇬🇧</span><span>English</span></button>
+        <button class="lang-btn" data-lang="de"><span class="lang-flag">🇩🇪</span><span>Deutsch</span></button>
+        <button class="lang-btn" data-lang="fr"><span class="lang-flag">🇫🇷</span><span>Français</span></button>
+        <button class="lang-btn" data-lang="es"><span class="lang-flag">🇪🇸</span><span>Español</span></button>
+        <button class="lang-btn" data-lang="ru"><span class="lang-flag">🇷🇺</span><span>Русский</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONFIRM MODAL ══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay" hidden>
+    <div class="modal-card">
+      <div class="modal-icon" id="modal-icon">⚠</div>
+      <div class="modal-title" id="modal-title">Confirm</div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" id="modal-cancel" data-i18n="modal.keep">Keep P-Cores ★</button>
+        <button class="modal-btn modal-btn-confirm" id="modal-confirm" data-i18n="modal.useAnyway">Use anyway</button>
+      </div>
+    </div>
+  </div>
+
   <div class="app">
 
     <!-- ══ SIDEBAR ════════════════════════════════════════════════ -->
@@ -26,36 +55,40 @@
       </div>
 
       <div class="sidebar-section">
-        <div class="sidebar-title">System</div>
+        <div class="sidebar-title" data-i18n="sidebar.system">System</div>
         <div class="sidebar-stat">
-          <span class="sidebar-stat-label">Status</span>
+          <span class="sidebar-stat-label" data-i18n="sidebar.status">Status</span>
           <span class="sidebar-stat-value orange" id="sb-status">idle</span>
         </div>
         <div class="sidebar-stat">
-          <span class="sidebar-stat-label">Provider</span>
+          <span class="sidebar-stat-label" data-i18n="sidebar.provider">Provider</span>
           <span class="sidebar-stat-value" id="sb-provider">—</span>
         </div>
         <div class="sidebar-stat">
-          <span class="sidebar-stat-label">Tool FPS</span>
+          <span class="sidebar-stat-label" data-i18n="sidebar.avgFps">Avg FPS</span>
           <span class="sidebar-stat-value orange" id="sb-fps">0.0</span>
         </div>
         <div class="sidebar-stat">
-          <span class="sidebar-stat-label">Hits</span>
+          <span class="sidebar-stat-label" data-i18n="sidebar.hits">Hits</span>
           <span class="sidebar-stat-value" id="sb-hits">0</span>
-        </div>
-        <div class="sidebar-stat">
-          <span class="sidebar-stat-label">Hits / min</span>
-          <span class="sidebar-stat-value" id="sb-hpm">0</span>
         </div>
 
         <div class="sidebar-actions">
-          <button class="sidebar-btn sidebar-btn-primary" id="btn-run">▶ RUN</button>
-          <button class="sidebar-btn sidebar-btn-stop" id="btn-stop" disabled>■ STOP</button>
+          <button class="sidebar-btn sidebar-btn-primary" id="btn-run" data-i18n="sidebar.run">▶ RUN</button>
+          <button class="sidebar-btn sidebar-btn-stop" id="btn-stop" disabled data-i18n="sidebar.stop">■ STOP</button>
         </div>
       </div>
 
+      <nav class="sidebar-nav">
+        <div class="sidebar-title" data-i18n="sidebar.menu">Menu</div>
+        <a class="nav-item active" data-page="open"><span class="nav-ico">◉</span> <span data-i18n="nav.open">Open</span></a>
+        <a class="nav-item" data-page="perf"><span class="nav-ico">⚡</span> <span data-i18n="nav.perf">Performance Monitor</span></a>
+        <a class="nav-item" data-page="info"><span class="nav-ico">ⓘ</span> <span data-i18n="nav.info">Info</span></a>
+        <a class="nav-item" data-page="settings"><span class="nav-ico">⚙</span> <span data-i18n="nav.settings">Settings</span></a>
+      </nav>
+
       <div class="sidebar-footer">
-        <div class="sidebar-copy">
+        <div class="sidebar-copy" data-i18n-html="sidebar.copy">
           MANUTEAA / DBD_ASC<br />
           FLASK UI · v1
         </div>
@@ -66,19 +99,29 @@
     <main class="main">
       <div class="topbar">
         <div class="page-title">
-          <h1>Auto Skill Check</h1>
-          <p>AI-powered great-skill-check detection &amp; auto-press</p>
+          <h1 id="topbar-title" data-i18n="topbar.title">Auto Skill Check</h1>
+          <p id="topbar-sub" data-i18n="topbar.sub">AI-powered great-skill-check detection &amp; auto-press</p>
         </div>
         <div class="topbar-right">
+          <div class="gpu-chip cpu-chip" id="cpu-chip" title="Detected CPU">
+            <span class="gpu-dot cpu-dot"></span>
+            <span id="cpu-name">CPU</span>
+            <span class="chip-pct" id="cpu-pct">—</span>
+          </div>
+          <div class="gpu-chip" id="gpu-chip" title="Detected GPU">
+            <span class="gpu-dot gpu-dot-static"></span>
+            <span id="gpu-name">GPU</span>
+            <span class="chip-pct" id="gpu-pct">—</span>
+          </div>
           <div class="gpu-chip">
             <span class="gpu-dot" id="status-dot"></span>
-            <span id="status-pill">IDLE</span>
+            <span id="status-pill" data-i18n="status.idle">IDLE</span>
             <span class="chip-pct" id="status-fps">—</span>
           </div>
         </div>
       </div>
 
-      <!-- FPS ADVISOR BANNER -->
+      <!-- FPS ADVISOR BANNER (shown only on Open page) -->
       <div class="advisor-banner advisor-hidden" id="advisor">
         <div class="advisor-icon" id="advisor-icon">⚠</div>
         <div class="advisor-body">
@@ -88,138 +131,315 @@
         <button class="advisor-close" id="advisor-close" title="Dismiss">✕</button>
       </div>
 
-      <!-- SETTINGS CARD -->
-      <div class="card card-settings">
-        <div class="card-head">
-          <div>
-            <div class="card-title">Inference Settings</div>
-            <div class="card-sub">Configure once, then RUN. Changes apply on next start.</div>
+      <!-- ══════════════════════════════════════════════════════════
+           PAGE: OPEN (default landing — settings + live)
+           ══════════════════════════════════════════════════════════ -->
+      <div class="page page-open active" data-page-id="open">
+
+        <!-- SETTINGS CARD -->
+        <div class="card card-settings">
+          <div class="card-head">
+            <div>
+              <div class="card-title" data-i18n="card.settings.title">Inference Settings</div>
+              <div class="card-sub" data-i18n="card.settings.sub">Configure once, then RUN. Changes apply on next start.</div>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <div class="setting-block">
+              <label class="setting-label" data-i18n="settings.aiModel">AI Model</label>
+              <select class="ctrl-select" id="cfg-model"></select>
+              <div class="setting-hint" id="cfg-model-hint" data-i18n-html="settings.aiModelHint">Drop ONNX or TensorRT files into <code>models/</code>.</div>
+            </div>
+
+            <div class="setting-block">
+              <label class="setting-label">
+                <span data-i18n="settings.device">Device</span>
+                <span class="setting-value" id="cfg-device-summary">—</span>
+              </label>
+              <div class="seg-control" id="cfg-device"></div>
+              <div class="setting-hint" id="cfg-device-hint" data-i18n="settings.deviceHintGpuRequires">GPU requires PyTorch + CUDA / DirectML / TensorRT.</div>
+            </div>
+
+            <div class="setting-block">
+              <label class="setting-label" data-i18n="settings.screenLib">Screen Lib</label>
+              <div class="seg-control" id="cfg-monlib"></div>
+              <div class="setting-hint" data-i18n="settings.screenLibHint">bettercam is faster but Windows-only and optional.</div>
+            </div>
+
+            <div class="setting-block">
+              <label class="setting-label" data-i18n="settings.monitor">Monitor</label>
+              <select class="ctrl-select" id="cfg-monitor"></select>
+              <div class="setting-hint" data-i18n="settings.monitorHint">Center 224×224 of the chosen monitor is sampled.</div>
+            </div>
+
+            <div class="setting-block">
+              <label class="setting-label">
+                <span data-i18n="settings.ante">Ante-frontier hit delay</span>
+                <span class="setting-value" id="cfg-ante-val">20 ms</span>
+              </label>
+              <input type="range" min="0" max="50" step="5" value="20" id="cfg-ante" />
+              <div class="setting-hint" id="cfg-ante-hint">Pre-press delay for ante-frontier hits.</div>
+              <div class="setting-hint setting-hint-sub" id="cfg-ante-guide">0–10 ms: aggressive · 15–25 ms: balanced · 30–50 ms: safer.</div>
+            </div>
+
+            <div class="setting-block">
+              <label class="setting-label">
+                <span data-i18n="settings.cpu">CPU workload</span>
+                <span class="setting-value" id="cfg-cpu-summary">—</span>
+              </label>
+              <div class="seg-control" id="cfg-cpu"></div>
+              <div class="setting-hint" id="cfg-cpu-hint" data-i18n="settings.cpuHint">Adapts to your CPU. Higher = more throughput, more load.</div>
+            </div>
           </div>
         </div>
 
-        <div class="settings-grid">
-          <div class="setting-block">
-            <label class="setting-label">AI Model</label>
-            <select class="ctrl-select" id="cfg-model"></select>
-            <div class="setting-hint" id="cfg-model-hint">Drop ONNX or TensorRT files into <code>models/</code>.</div>
+        <!-- MINI STATS -->
+        <div class="stats-row">
+          <div class="mini-stat">
+            <div class="mini-label" data-i18n="mini.avgFps">Average FPS</div>
+            <div class="mini-value orange" id="ms-fps">0.0</div>
+            <div class="mini-bar"><div class="mini-bar-fill orange" id="ms-fps-bar"></div></div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-label" data-i18n="mini.hitsTotal">Hits Total</div>
+            <div class="mini-value" id="ms-hits">0</div>
+            <div class="mini-bar"><div class="mini-bar-fill amber" id="ms-hits-bar"></div></div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-label" data-i18n="mini.gameCap">Game FPS Cap</div>
+            <div class="mini-value" id="ms-gamefps">—</div>
+            <div class="mini-bar"><div class="mini-bar-fill amber" id="ms-gamefps-bar"></div></div>
+          </div>
+        </div>
+
+        <!-- FPS CAP CONTROL — own row directly under the FPS cap mini stat -->
+        <div class="fps-cap-bar">
+          <div class="fps-cap-info">
+            <div class="fps-cap-title" data-i18n="settings.fpsCap">Game FPS Cap</div>
+            <div class="fps-cap-desc" id="cfg-fpscap-hint" data-i18n-html="settings.fpsCapHint">
+              Writes <code>FrameRateLimit</code> in DBD's <code>GameUserSettings.ini</code>. Restart Dead by Daylight for it to take effect.
+            </div>
+            <div class="fps-cap-status" id="cfg-fpscap-status"></div>
+          </div>
+          <div class="fps-cap-ctrl">
+            <div class="seg-control" id="cfg-fpscap"></div>
+          </div>
+        </div>
+
+        <!-- LIVE FEED + DONUT -->
+        <div class="content-grid">
+          <div class="card card-feed">
+            <div class="card-head">
+              <div>
+                <div class="card-title" data-i18n="card.feed.title">Live Monitor Feed</div>
+                <div class="card-sub" data-i18n="card.feed.sub">Center 224×224 the model sees</div>
+              </div>
+              <div class="feed-fps" id="feed-fps-chip">— FPS</div>
+            </div>
+            <div class="feed-wrap">
+              <img id="live-feed" alt="live feed (start the tool to populate)" />
+              <div class="feed-empty" id="feed-empty" data-i18n="card.feed.empty">Press RUN or pick a monitor to preview</div>
+            </div>
           </div>
 
-          <div class="setting-block">
-            <label class="setting-label">
-              Device
-              <span class="setting-value" id="cfg-device-summary">—</span>
-            </label>
-            <div class="seg-control" id="cfg-device"></div>
-            <div class="setting-hint" id="cfg-device-hint">GPU requires PyTorch + CUDA / DirectML / TensorRT.</div>
+          <div class="card card-donut">
+            <div class="card-head">
+              <div>
+                <div class="card-title" data-i18n="card.donut.title">Last Skill Check</div>
+                <div class="card-sub" id="donut-sub" data-i18n="card.donut.subEmpty">No hit yet</div>
+              </div>
+            </div>
+            <div class="donut-wrap">
+              <svg class="donut-svg" viewBox="0 0 120 120">
+                <circle class="donut-bg" cx="60" cy="60" r="50"></circle>
+                <circle class="donut-seg seg-high" cx="60" cy="60" r="50" id="donut-seg"></circle>
+              </svg>
+              <div class="donut-center">
+                <div class="donut-val" id="donut-val">—</div>
+                <div class="donut-lbl" data-i18n="card.donut.label">CONFIDENCE</div>
+              </div>
+            </div>
+            <div class="donut-legend" id="donut-legend"></div>
           </div>
 
-          <div class="setting-block">
-            <label class="setting-label">Screen Lib</label>
-            <div class="seg-control" id="cfg-monlib"></div>
-            <div class="setting-hint">bettercam is faster but Windows-only and optional.</div>
-          </div>
-
-          <div class="setting-block">
-            <label class="setting-label">Monitor</label>
-            <select class="ctrl-select" id="cfg-monitor"></select>
-            <div class="setting-hint">Center 224×224 of the chosen monitor is sampled.</div>
-          </div>
-
-          <div class="setting-block">
-            <label class="setting-label">
-              Ante-frontier hit delay
-              <span class="setting-value" id="cfg-ante-val">20 ms</span>
-            </label>
-            <input type="range" min="0" max="50" step="5" value="20" id="cfg-ante" />
-            <div class="setting-hint">Tiny pre-press delay for ante-frontier hits.</div>
-          </div>
-
-          <div class="setting-block">
-            <label class="setting-label">
-              CPU workload
-              <span class="setting-value" id="cfg-cpu-summary">—</span>
-            </label>
-            <div class="seg-control" id="cfg-cpu"></div>
-            <div class="setting-hint" id="cfg-cpu-hint">Adapts to your CPU. Higher = more throughput, more load.</div>
+          <div class="card card-lasthit">
+            <div class="card-head">
+              <div>
+                <div class="card-title" data-i18n="card.lasthit.title">Last Hit Frame</div>
+                <div class="card-sub" id="lasthit-sub" data-i18n="card.lasthit.sub">Captured frame the model fired SPACE on</div>
+              </div>
+            </div>
+            <div class="lasthit-wrap">
+              <img id="lasthit-img" alt="last hit frame (none yet)" />
+              <div class="feed-empty" id="lasthit-empty" data-i18n="card.lasthit.empty">No hit yet</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- MINI STATS -->
-      <div class="stats-row">
-        <div class="mini-stat">
-          <div class="mini-label">Tool FPS</div>
-          <div class="mini-value orange" id="ms-fps">0.0</div>
-          <div class="mini-bar"><div class="mini-bar-fill orange" id="ms-fps-bar"></div></div>
+      <!-- ══════════════════════════════════════════════════════════
+           PAGE: PERFORMANCE MONITOR (own page)
+           ══════════════════════════════════════════════════════════ -->
+      <div class="page page-perf" data-page-id="perf">
+        <!-- BIG CHART CARD (SUV-style switchable line chart) -->
+        <div class="card card-chart">
+          <div class="card-head">
+            <div>
+              <div class="card-title" data-i18n="perf.chartTitle">Performance Monitor</div>
+              <div class="card-sub" data-i18n="perf.chartSub">Real-time GPU + detection metrics</div>
+            </div>
+            <div class="chart-tabs">
+              <button class="chart-tab active" data-metric="fps" data-i18n="perf.chartFps">FPS</button>
+              <button class="chart-tab" data-metric="gpu" data-i18n="perf.chartGpu">GPU %</button>
+              <button class="chart-tab" data-metric="vram" data-i18n="perf.chartVram">VRAM</button>
+              <button class="chart-tab" data-metric="temp" data-i18n="perf.chartTemp">Temp</button>
+            </div>
+          </div>
+          <div class="chart-holder">
+            <div class="chart-label" id="chartMaxLabel">100</div>
+            <div class="chart-value-big" id="chartBigValue">0</div>
+            <div class="chart-value-sub" id="chartBigLabel">FPS</div>
+            <canvas id="mainChart"></canvas>
+          </div>
         </div>
-        <div class="mini-stat">
-          <div class="mini-label">Hits Total</div>
-          <div class="mini-value" id="ms-hits">0</div>
-          <div class="mini-bar"><div class="mini-bar-fill amber" id="ms-hits-bar"></div></div>
-        </div>
-        <div class="mini-stat">
-          <div class="mini-label">Hits / min</div>
-          <div class="mini-value" id="ms-hpm">0</div>
-          <div class="mini-bar"><div class="mini-bar-fill orange" id="ms-hpm-bar"></div></div>
-        </div>
-        <div class="mini-stat">
-          <div class="mini-label">Game FPS Cap</div>
-          <div class="mini-value" id="ms-gamefps">—</div>
-          <div class="mini-bar"><div class="mini-bar-fill amber" id="ms-gamefps-bar"></div></div>
+
+        <div class="perf-grid">
+          <!-- GPU CARD -->
+          <div class="perf-card">
+            <div class="perf-head">
+              <div class="perf-title" id="perf-gpu-name">GPU</div>
+              <div class="perf-subtitle" id="perf-gpu-clocks">— MHz / — MHz</div>
+            </div>
+            <div class="perf-metrics">
+              <div class="perf-metric">
+                <div class="perf-metric-label" data-i18n="perf.utilization">Utilization</div>
+                <div class="perf-metric-value orange" id="perf-gpu-util">—</div>
+                <div class="perf-bar"><div class="perf-bar-fill orange" id="perf-gpu-util-bar"></div></div>
+              </div>
+              <div class="perf-metric">
+                <div class="perf-metric-label" data-i18n="perf.power">Power</div>
+                <div class="perf-metric-value" id="perf-gpu-power">—</div>
+                <div class="perf-bar"><div class="perf-bar-fill amber" id="perf-gpu-power-bar"></div></div>
+              </div>
+              <div class="perf-metric">
+                <div class="perf-metric-label" data-i18n="perf.temperature">Temperature</div>
+                <div class="perf-metric-value" id="perf-gpu-temp">—</div>
+                <div class="perf-bar"><div class="perf-bar-fill red" id="perf-gpu-temp-bar"></div></div>
+              </div>
+              <div class="perf-metric">
+                <div class="perf-metric-label" data-i18n="perf.vram">VRAM</div>
+                <div class="perf-metric-value" id="perf-gpu-mem">—</div>
+                <div class="perf-bar"><div class="perf-bar-fill orange" id="perf-gpu-mem-bar"></div></div>
+              </div>
+              <div class="perf-metric">
+                <div class="perf-metric-label" data-i18n="perf.fan">Fan</div>
+                <div class="perf-metric-value" id="perf-gpu-fan">—</div>
+              </div>
+              <div class="perf-metric">
+                <div class="perf-metric-label" data-i18n="perf.memUtil">Memory Util</div>
+                <div class="perf-metric-value" id="perf-gpu-memutil">—</div>
+              </div>
+            </div>
+            <div class="perf-hint" id="perf-gpu-hint"></div>
+          </div>
+
+          <!-- CPU CARD -->
+          <div class="perf-card">
+            <div class="perf-head">
+              <div class="perf-title" id="perf-cpu-name">CPU</div>
+              <div class="perf-subtitle" id="perf-cpu-freq">— MHz</div>
+            </div>
+            <div class="perf-metrics">
+              <div class="perf-metric">
+                <div class="perf-metric-label" data-i18n="perf.totalUtil">Total Utilization</div>
+                <div class="perf-metric-value orange" id="perf-cpu-util">—</div>
+                <div class="perf-bar"><div class="perf-bar-fill orange" id="perf-cpu-util-bar"></div></div>
+              </div>
+              <div class="perf-metric">
+                <div class="perf-metric-label" data-i18n="perf.power">Power</div>
+                <div class="perf-metric-value" id="perf-cpu-power">—</div>
+                <div class="perf-bar"><div class="perf-bar-fill amber" id="perf-cpu-power-bar"></div></div>
+              </div>
+              <div class="perf-metric">
+                <div class="perf-metric-label" data-i18n="perf.temperature">Temperature</div>
+                <div class="perf-metric-value" id="perf-cpu-temp">—</div>
+                <div class="perf-bar"><div class="perf-bar-fill red" id="perf-cpu-temp-bar"></div></div>
+              </div>
+            </div>
+            <div class="perf-section-title" data-i18n="perf.perCore">Per-core Utilization</div>
+            <div class="cpu-cores" id="cpu-cores"></div>
+            <div class="perf-hint perf-hint-warn" id="perf-cpu-hint"></div>
+          </div>
         </div>
       </div>
 
-      <!-- LIVE FEED + DONUT -->
-      <div class="content-grid">
-        <div class="card card-feed">
-          <div class="card-head">
-            <div>
-              <div class="card-title">Live Monitor Feed</div>
-              <div class="card-sub">Center 224×224 the model sees</div>
+      <!-- ══════════════════════════════════════════════════════════
+           PAGE: INFO (CUDA / Python / packages)
+           ══════════════════════════════════════════════════════════ -->
+      <div class="page page-info" data-page-id="info">
+        <div class="info-grid">
+          <div class="card info-card">
+            <div class="card-head">
+              <div>
+                <div class="card-title" data-i18n="info.envTitle">Environment</div>
+                <div class="card-sub" data-i18n="info.envSub">Python · OS · drivers · CUDA toolkit</div>
+              </div>
             </div>
-            <div class="feed-fps" id="feed-fps-chip">— FPS</div>
+            <div class="info-rows" id="info-env"></div>
           </div>
-          <div class="feed-wrap">
-            <img id="live-feed" alt="live feed (start the tool to populate)" />
-            <div class="feed-empty" id="feed-empty">Press RUN or pick a monitor to preview</div>
-          </div>
-        </div>
 
-        <div class="card card-donut">
-          <div class="card-head">
-            <div>
-              <div class="card-title">Last Skill Check</div>
-              <div class="card-sub" id="donut-sub">No hit yet</div>
+          <div class="card info-card">
+            <div class="card-head">
+              <div>
+                <div class="card-title" data-i18n="info.pkgTitle">Python Packages</div>
+                <div class="card-sub" data-i18n="info.pkgSub">Installed dependencies for the inference pipeline</div>
+              </div>
             </div>
-          </div>
-          <div class="donut-wrap">
-            <svg class="donut-svg" viewBox="0 0 120 120">
-              <circle class="donut-bg" cx="60" cy="60" r="50"></circle>
-              <circle class="donut-seg seg-high" cx="60" cy="60" r="50" id="donut-seg"></circle>
-            </svg>
-            <div class="donut-center">
-              <div class="donut-val" id="donut-val">—</div>
-              <div class="donut-lbl">CONFIDENCE</div>
-            </div>
-          </div>
-          <div class="donut-legend" id="donut-legend"></div>
-        </div>
-
-        <div class="card card-lasthit">
-          <div class="card-head">
-            <div>
-              <div class="card-title">Last Hit Frame</div>
-              <div class="card-sub" id="lasthit-sub">Captured frame the model fired SPACE on</div>
-            </div>
-          </div>
-          <div class="lasthit-wrap">
-            <img id="lasthit-img" alt="last hit frame (none yet)" />
-            <div class="feed-empty" id="lasthit-empty">No hit yet</div>
+            <div class="pkg-table" id="info-packages"></div>
           </div>
         </div>
       </div>
 
-      <div class="footer-note">
+      <!-- ══════════════════════════════════════════════════════════
+           PAGE: SETTINGS (language only)
+           ══════════════════════════════════════════════════════════ -->
+      <div class="page page-settings" data-page-id="settings">
+        <div class="settings-rows">
+          <div class="setting-row">
+            <div class="setting-row-info">
+              <div class="setting-row-title" data-i18n="settings.lang">Language</div>
+              <div class="setting-row-desc" data-i18n="settings.langDesc">Interface language — saved in your browser.</div>
+            </div>
+            <div class="setting-row-ctrl">
+              <div class="seg-control seg-lang" id="cfg-lang"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card about-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title" data-i18n="info.aboutTitle">About</div>
+              <div class="card-sub" data-i18n="info.aboutSub">Open-source · Flask UI for Manuteaa/dbd_autoSkillCheck</div>
+            </div>
+          </div>
+          <p data-i18n-html="about.p1">
+            Drop-in Flask UI for <a href="https://github.com/Manuteaa/dbd_autoSkillCheck" target="_blank" rel="noopener">Manuteaa/dbd_autoSkillCheck</a>.
+            The default Gradio app (<code>app.py</code>) is untouched — run <code>python app_flask.py</code> for this UI instead.
+          </p>
+          <p data-i18n-html="about.p2">
+            Hardware-adaptive CPU presets, hybrid-CPU P-Cores pinning, GPU performance monitor (NVIDIA only via <code>nvidia-smi</code>),
+            and a live FPS advisor that compares the rolling tool FPS to the game's <code>FrameRateLimit</code>.
+          </p>
+          <p class="footer-note-inner" data-i18n-html="about.p3">
+            CPU temperature / power readings require <a href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor" target="_blank" rel="noopener">LibreHardwareMonitor</a>
+            to be installed and running (its WMI namespace is queried).
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-note" data-i18n-html="footer.note">
         Open-source · drop-in alternative to <code>app.py</code> (Gradio). Source:
         <a href="https://github.com/Manuteaa/dbd_autoSkillCheck" target="_blank" rel="noopener">github.com/Manuteaa/dbd_autoSkillCheck</a>
       </div>

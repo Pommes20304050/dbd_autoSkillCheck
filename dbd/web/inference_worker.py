@@ -1,3 +1,4 @@
+import os
 import threading
 from time import time, sleep
 
@@ -6,6 +7,7 @@ import cv2
 from dbd.AI_model import AI_model
 from dbd.utils.directkeys import PressKey, ReleaseKey, SPACE
 from dbd.utils.monitoring_mss import Monitoring_mss
+from dbd.web import system_info
 
 try:
     from dbd.utils.monitoring_bettercam import Monitoring_bettercam
@@ -44,6 +46,13 @@ class InferenceWorker(threading.Thread):
 
     def run(self):
         self.state.set_status("starting")
+
+        # Pin process to selected affinity mask BEFORE loading the ONNX session,
+        # so all worker threads inherit the affinity and stay off E-cores.
+        # On 14900K this is the difference between 980 fps (P-only) and 525 fps (all cores).
+        affinity_mask = self.config.get("cpu_affinity_mask", 0)
+        if affinity_mask and self.config.get("device") == "CPU":
+            system_info.set_process_affinity(affinity_mask)
 
         try:
             monitoring = make_monitoring(self.config["monitoring_lib"], self.config["monitor_id"])
@@ -125,4 +134,7 @@ class InferenceWorker(threading.Thread):
             except Exception:
                 pass
             self.ai_model = None
+            # Restore process affinity to all logical CPUs after stopping
+            if affinity_mask:
+                system_info.set_process_affinity((1 << (os.cpu_count() or 32)) - 1)
             self.state.set_status("idle")
