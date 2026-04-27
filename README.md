@@ -8,7 +8,6 @@ Built on PyTorch · MobileNet V3 · ONNX Runtime · CUDA / TensorRT
 
 ![demo](images/demo.gif)
 
-*Demo at 2× speed*
 
 </div>
 
